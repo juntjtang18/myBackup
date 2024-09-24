@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Backup Home</title>
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+    <style>
+        /* Custom Styles */
+        body {
+            background-color: #f8f9fa; /* Light gray background */
+        }
+
+        .navbar {
+            background-color: #343a40; /* Dark background for navbar */
+        }
+
+        .navbar-brand,
+        .nav-link {
+            color: #ffffff !important; /* White text color for navbar */
+        }
+
+        .navbar-brand:hover,
+        .nav-link:hover {
+            color: #d4d4d4 !important; /* Light gray on hover */
+        }
+
+        .hero-section {
+            background: linear-gradient(to right, #007bff, #6f42c1); /* Gradient background */
+            color: white;
+        }
+
+        .hero-section h1 {
+            font-weight: 700; /* Bold text */
+        }
+
+        .hero-section p {
+            font-size: 1.25rem; /* Larger font size */
+        }
+
+        .card {
+            transition: transform 0.2s; /* Smooth scale effect */
+        }
+
+        .card:hover {
+            transform: scale(1.05); /* Scale effect on hover */
+        }
+
+        footer {
+            background-color: #343a40; /* Dark background for footer */
+            color: #ffffff; /* White text color for footer */
+        }
+
+        footer a {
+            color: #ffffff; /* White text color for footer links */
+        }
+
+        footer a:hover {
+            color: #d4d4d4; /* Light gray on hover */
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg">
+        <div class="container">
+            <a class="navbar-brand" href="#">MyBackup</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="#">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">About</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Contact</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="hero-section text-center py-5">
+        <div class="container">
+            <h1 class="display-4">Welcome to MyBackup</h1>
+            <p class="lead">Your data is safe with us. Backup and restore made easy.</p>
+            <a href="#" class="btn btn-light btn-lg">Get Started</a>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="container my-5">
+        <h2 class="text-center mb-4">Features</h2>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card mb-4">
+                    <img src="/images/feature1.jpg" class="card-img-top" alt="Feature 1">
+                    <div class="card-body">
+                        <h5 class="card-title">Secure Backup</h5>
+                        <p class="card-text">Keep your data safe with our secure backup solutions.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card mb-4">
+                    <img src="/images/feature2.jpg" class="card-img-top" alt="Feature 2">
+                    <div class="card-body">
+                        <h5 class="card-title">Easy Restore</h5>
+                        <p class="card-text">Quickly restore your data with just a few clicks.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card mb-4">
+                    <img src="/images/feature3.jpg" class="card-img-top" alt="Feature 3">
+                    <div class="card-body">
+                        <h5 class="card-title">Cloud Integration</h5>
+                        <p class="card-text">Seamlessly integrate with your favorite cloud services.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="text-center py-4">
+        <div class="container">
+            <p class="m-0">© 2024 MyBackup. All rights reserved.</p>
+            <div>
+                <a href="#" class="me-3"><i class="bi bi-facebook"></i></a>
+                <a href="#" class="me-3"><i class="bi bi-twitter"></i></a>
+                <a href="#"><i class="bi bi-instagram"></i></a>
+            </div>
+        </div>
+    </footer>
+
+    <script src="/js/bootstrap.bundle.min.js"></script> <!-- Bootstrap Bundle with Popper -->
+</body>
+</html>

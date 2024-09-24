@@ -1,0 +1,15 @@
+{
+  "name": "myBackup",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "echo 'Build completed without copying Bootstrap files.'"
+  },
+  "dependencies": {
+    "bootstrap": "^5.3.0",
+    "bootstrap-icons": "^1.11.3"
+  },
+  "devDependencies": {
+    "cross-env": "^7.0.3",
+    "cross-var": "^1.1.0"
+  }
+}
