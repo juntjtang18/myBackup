@@ -38,3 +38,7 @@ build/
 
 ### VS Code ###
 .vscode/
+
+#project application
+clients.json
+ServerRegistration.json

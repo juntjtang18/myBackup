@@ -59,6 +59,12 @@
             color: #d4d4d4; /* Light gray on hover */
         }
     </style>
+    <script>
+        function getStarted() {
+            // Redirect to the /start endpoint
+            window.location.href = '/start';
+        }
+    </script>
 </head>
 <body>
 
@@ -90,7 +96,7 @@
         <div class="container">
             <h1 class="display-4">Welcome to MyBackup</h1>
             <p class="lead">Your data is safe with us. Backup and restore made easy.</p>
-            <a href="#" class="btn btn-light btn-lg">Get Started</a>
+            <a href="javascript:void(0);" class="btn btn-light btn-lg" onclick="getStarted()">Get Started</a>
         </div>
     </header>
 
