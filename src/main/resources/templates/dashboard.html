@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .repository-icon {
+            width: 50px;
+            height: 50px;
+        }
+        .repository-panel {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+        }
+        .repository-card {
+            width: 150px;
+            margin: 10px;
+            text-align: center;
+        }
+        .repository-card img {
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="#">MyBackup Dashboard</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Repositories</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Settings</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Repository Panel -->
+    <div class="container mt-4">
+        <h2>Your Repositories</h2>
+        <div id="repository-panel" class="repository-panel">
+            <!-- Repositories will be injected here -->
+        </div>
+    </div>
+
+    <!-- JavaScript to Fetch Repositories -->
+    <script>
+        const clientID = "{{clientID}}";  // clientID is injected from the backend
+
+        async function fetchRepositories() {
+            try {
+                const response = await fetch(`/api/repositories/list?clientID=${clientID}`);
+                if (response.ok) {
+                    const repositories = await response.json();
+                    displayRepositories(repositories);
+                } else {
+                    console.error('Failed to fetch repositories');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        function displayRepositories(repositories) {
+            const repositoryPanel = document.getElementById('repository-panel');
+            repositoryPanel.innerHTML = ''; // Clear existing content
+
+            repositories.forEach(repo => {
+                const repoCard = document.createElement('div');
+                repoCard.classList.add('repository-card');
+
+                repoCard.innerHTML = `
+                    <img src="storage_icon.png" alt="Repository Icon" class="repository-icon">
+                    <p>${repo.name}</p>
+                `;
+                repositoryPanel.appendChild(repoCard);
+            });
+        }
+
+        // Fetch repositories when the page loads
+        document.addEventListener('DOMContentLoaded', fetchRepositories);
+    </script>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

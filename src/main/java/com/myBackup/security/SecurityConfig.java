@@ -15,7 +15,7 @@ public class SecurityConfig {
         http
             .authorizeRequests(authorizeRequests ->
                 authorizeRequests
-                    .requestMatchers("/", "/home","/css/**", "/js/**", "/fonts/**", "/icons/**", "/images/**").permitAll() // Allow access to these paths
+                    //.requestMatchers("/", "/home","/css/**", "/js/**", "/fonts/**", "/icons/**", "/images/**").permitAll() // Allow access to these paths
                     .anyRequest().permitAll() // All other requests require authentication
             )
             .formLogin(formLogin -> 
