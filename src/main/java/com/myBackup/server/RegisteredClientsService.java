@@ -1,7 +1,7 @@
 package com.myBackup.server;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.myBackup.client.ClientInfo;
+import com.myBackup.client.services.ClientInfo;
 import com.myBackup.security.TokenInfo;
 
 import org.slf4j.Logger;
@@ -24,7 +24,7 @@ public class RegisteredClientsService {
     private static final Logger logger = LoggerFactory.getLogger(RegisteredClientsService.class);
     private final Map<String, ClientInfo> clientCache = new ConcurrentHashMap<>();
     private ObjectMapper objectMapper;
-    private final String clientsFilePath = Paths.get(System.getProperty("user.dir"), "clients.json").toString();
+    private final String clientsFilePath = Paths.get(System.getProperty("user.dir"), "config", "server", "clients.json").toString();
     private final ReentrantLock lock = new ReentrantLock();
 
     @Autowired
@@ -64,12 +64,28 @@ public class RegisteredClientsService {
         }
     }
 
-    // Save clients from the cache to clients.json
+ // Save clients from the cache to clients.json
     public void saveClients() {
         lock.lock();
         try {
-            objectMapper.writeValue(new File(clientsFilePath), clientCache.values());
+            // Get the file object
+            File file = new File(clientsFilePath);
+            File parentDir = file.getParentFile();
+            
+            // Create the parent directory if it doesn't exist
+            if (parentDir != null && !parentDir.exists()) {
+                parentDir.mkdirs(); // Create the directory and any necessary parent directories
+            }
+
+            // Create the file if it doesn't exist
+            if (!file.exists()) {
+                file.createNewFile(); // Create the file
+            }
+
+            // Write the client cache to the file
+            objectMapper.writeValue(file, clientCache.values());
             logger.debug("Saved {} clients to {}", clientCache.size(), clientsFilePath);
+            
         } catch (IOException e) {
             logger.error("Error saving clients to file: {}", e.getMessage());
         } finally {

@@ -1,4 +1,4 @@
-package com.myBackup.client;
+package com.myBackup.client.services;
 
 import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;
@@ -21,11 +21,13 @@ public class ServerRegistrationFilter implements Filter {
 
     //@Autowired
     //private ServerRegistration serverRegistration;
-    private final ServerRegistrationService serverRegistration; // Dependency
-
+    private final ServerRegistrationService serverRegistrationService; // Dependency
+    //private final UUIDService uuidService;
+    
     // Constructor injection for ServerRegistration
-    public ServerRegistrationFilter(ServerRegistrationService serverRegistration) {
-        this.serverRegistration = serverRegistration;
+    public ServerRegistrationFilter(ServerRegistrationService serverRegistrationService) {
+        this.serverRegistrationService = serverRegistrationService;
+        //this.uuidService = uuidService;
     }
 
     @Override
@@ -50,7 +52,7 @@ public class ServerRegistrationFilter implements Filter {
         // Construct the full server address
         String targetServer = scheme + "://" + serverName + ":" + serverPort; 
 
-        logger.debug("Request client address: {}, server address: {}", clientAddress, targetServer);
+        //logger.debug("Request client address: {}, server address: {}", clientAddress, targetServer);
 
         // Check if the request is for the /register-to-server endpoint
         if (httpRequest.getRequestURI().equals("/register-to-server")) {
@@ -59,7 +61,7 @@ public class ServerRegistrationFilter implements Filter {
         }
         
         // Check if the target server is registered
-        boolean isRegistered = serverRegistration.isRegistered(targetServer);
+        boolean isRegistered = serverRegistrationService.isRegistered(targetServer);
 
         if (!isRegistered) {
             // If the client address matches the server's localhost address
@@ -69,8 +71,8 @@ public class ServerRegistrationFilter implements Filter {
 
             if (isSameMachine) {
                 // Perform automatic registration
-                serverRegistration.registerToLocalServer(targetServer);
-                logger.info("Automatic registration completed for server: {}", targetServer);
+                serverRegistrationService.registerToLocalServer(targetServer);
+                logger.info("Automatic registration completed to server: {}", targetServer);
                 // Proceed to the next filter or resource
                 chain.doFilter(request, response);
                 return;

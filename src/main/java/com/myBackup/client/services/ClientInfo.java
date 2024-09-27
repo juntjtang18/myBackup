@@ -1,4 +1,4 @@
-package com.myBackup.client;
+package com.myBackup.client.services;
 
 import com.myBackup.security.TokenInfo;
 

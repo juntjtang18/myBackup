@@ -138,19 +138,23 @@
 	        const url = `/api/repositories/create?destDir=${encodeURIComponent(folderPath)}&clientID=${encodeURIComponent(clientID)}`;
 	
 	        // Make a POST request to create a new repository
-	        fetch(url, {
-	            method: 'POST',
-	            headers: {
-	                'Content-Type': 'application/x-www-form-urlencoded'
-	            }
-	        })
-	        .then(response => {
-	            if (response.ok) {
-	                return response.json(); // Parse the response JSON
-	            } else {
-	                throw new Error('Failed to create repository');
-	            }
-	        })
+			fetch('/api/repositories/create', {
+			    method: 'POST',
+			    headers: {
+			        'Content-Type': 'application/json' // Set the correct content type
+			    },
+			    body: JSON.stringify({ // Send a JSON body
+			        destDirectory: folderPath,
+			        clientID: clientID
+			    })
+			})
+			.then(response => {
+			    if (response.ok) {
+			        return response.json(); // Parse the response JSON
+			    } else {
+			        throw new Error('Failed to create repository');
+			    }
+			})
 	        .then(data => {
 	            // Ensure the repository data is correctly deserialized and displayed
 	            alert('New Repository Created: ' + JSON.stringify(data));

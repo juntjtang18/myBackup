@@ -1,14 +1,14 @@
-package com.myBackup.client;
+package com.myBackup.client.services;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
+
 import com.myBackup.security.TokenInfo;
 
 import jakarta.annotation.PostConstruct;
@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.nio.file.Paths;
 import java.time.Instant;
 import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -30,12 +29,15 @@ public class ServerRegistrationService {
     private final Map<String, TokenInfo> tokenCache = new ConcurrentHashMap<>();
     private final ReentrantLock lock = new ReentrantLock();
     private final RestTemplate restTemplate = new RestTemplate();
-    private final String tokenCacheFilePath = Paths.get(System.getProperty("user.dir"), "ServerRegistration.json").toString();
-    private final ObjectMapper objectMapper;  // Jackson ObjectMapper for JSON serialization
     
-    @Autowired
-    public ServerRegistrationService(ObjectMapper objectMapper) {
+    // Change the file location to <user.dir>/config/ServerRegistration.json
+    private final String tokenCacheFilePath = Paths.get(System.getProperty("user.dir"), "config", "client", "ServerRegistration.json").toString();
+    private final ObjectMapper objectMapper;  // Jackson ObjectMapper for JSON serialization
+    private final UUIDService uuidService;
+    
+    public ServerRegistrationService(ObjectMapper objectMapper, UUIDService uuidService) {
     	this.objectMapper = objectMapper;
+    	this.uuidService = uuidService;
     }
     
     @PostConstruct
@@ -49,14 +51,25 @@ public class ServerRegistrationService {
         saveTokenCache(); // Save the token cache to the file before the application shuts down
     }
 
-    // Save the token cache to a JSON file using Jackson
+ // Save the token cache to a JSON file using Jackson
     public void saveTokenCache() {
         lock.lock();
         try {
-            logger.debug("Saving token cache to {}.", tokenCacheFilePath);
+            // Create the parent directory if it doesn't exist
+            File file = new File(tokenCacheFilePath);
+            File parentDir = file.getParentFile();
             
-            File file = new File(tokenCacheFilePath);            
-            objectMapper.writeValue(file, tokenCache);  // Serialize the tokenCache map into JSON and save to file
+            if (parentDir != null && !parentDir.exists()) {
+                parentDir.mkdirs(); // Create the subdirectory and any necessary parent directories
+            }
+
+            // Create the file if it doesn't exist
+            if (!file.exists()) {
+                file.createNewFile(); // Create the file
+            }
+
+            logger.debug("Saving token cache to {}.", tokenCacheFilePath);
+            objectMapper.writeValue(file, tokenCache); // Serialize the tokenCache map into JSON and save to file
         } catch (IOException e) {
             logger.error("Error saving token cache to JSON file: {}", e.getMessage());
         } finally {
@@ -83,7 +96,7 @@ public class ServerRegistrationService {
         }
     }
 
-	// Retrieve a new token for a given server address (can be localhost or remote)
+    // Retrieve a new token for a given server address (can be localhost or remote)
     public TokenInfo registerToLocalServer(String serverAddress) {
         logger.debug("ServerRegistration::register invoked for server address: {}", serverAddress);
         
@@ -93,7 +106,7 @@ public class ServerRegistrationService {
             
             // Create a map for the form parameters (uuid and username)
             MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
-            formData.add("uuid", UUID.randomUUID().toString()); // Add the UUID to the request body
+            formData.add("uuid", uuidService.getUUID()); // Add the UUID to the request body
             formData.add("username", System.getProperty("user.name")); // Optional two-factor code
 
             // Log the form data for tracking purposes
@@ -123,7 +136,6 @@ public class ServerRegistrationService {
         logger.debug("Registration process completed for server: {}", serverAddress);
         return null;
     }
-
 
     // Check if the access token is expired
     public boolean isTokenExpired(TokenInfo tokenInfo) {
