@@ -2,33 +2,81 @@ package com.myBackup.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 
+import com.myBackup.security.CustomAuthenticationFailureHandler;
+
+@SuppressWarnings("deprecation")
 @Configuration
 @EnableWebSecurity
+@EnableGlobalMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
+	private UserDetailsService userDetailsService;
+	
+	public SecurityConfig(UserDetailsService userDetailsService) {
+		this.userDetailsService = userDetailsService;
+	}
+	
+    @Bean
+    public AuthenticationManager authManager(HttpSecurity http) throws Exception {
+        AuthenticationManagerBuilder authenticationManagerBuilder = 
+            http.getSharedObject(AuthenticationManagerBuilder.class);
+        authenticationManagerBuilder.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder());
+        return authenticationManagerBuilder.build();
+    }
+    
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+    @Bean
+    public AuthenticationFailureHandler customAuthenticationFailureHandler() {
+        return new CustomAuthenticationFailureHandler();
+    }
+    
+    @Bean
+    public RoleHierarchy roleHierarchy() {
+        RoleHierarchyImpl roleHierarchy = new RoleHierarchyImpl();
+        roleHierarchy.setHierarchy("ROLE_ADMIN > ROLE_USER");
+        return roleHierarchy;
+    }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
             .authorizeRequests(authorizeRequests ->
                 authorizeRequests
-                    //.requestMatchers("/", "/home","/css/**", "/js/**", "/fonts/**", "/icons/**", "/images/**").permitAll() // Allow access to these paths
-                    .anyRequest().permitAll() // All other requests require authentication
+                .requestMatchers("/", "/home", "/login", "/login-auto", "/logout", "/css/**", "/js/**", "/fonts/**", "/icons/**", "/images/**")
+                .permitAll()
+                .anyRequest().authenticated() // All other requests require authentication
             )
-            .formLogin(formLogin -> 
-                formLogin
-                    .loginPage("/login") // Customize login page if needed
-                    .permitAll() // Allow everyone to see the login page
+            .formLogin(form -> form
+                    .loginPage("/login")
+                    .failureHandler(customAuthenticationFailureHandler()) // Ensure custom handler is used
+                    .defaultSuccessUrl("/home", true)
+                    .failureUrl("/login?error=true")
+                    .permitAll()
             )
-            .logout(logout ->
-                logout
-                    .permitAll() // Allow everyone to log out
-            )
-            .csrf(csrf -> csrf.disable()) // Disable CSRF for simplicity (only if not needed)
-            ; // Enable Basic Auth for testing (optional)
+            .logout()
+	            .logoutUrl("/logout")
+	            .logoutSuccessUrl("/login?logout=true")
+	            .invalidateHttpSession(true)
+	            .deleteCookies("JSESSIONID")
+	            .permitAll() // Ensure logout URL is accessible to all
+	            .and()
+            .exceptionHandling()
+            	.accessDeniedPage("/403");
 
         return http.build();
     }

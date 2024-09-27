@@ -58,6 +58,14 @@
         footer a:hover {
             color: #d4d4d4; /* Light gray on hover */
         }
+
+        /* Profile Image Style */
+        .profile-img {
+            width: 40px; /* Set desired width */
+            height: 40px; /* Set desired height */
+            border-radius: 50%; /* Make the image round */
+            margin-left: 10px; /* Space between navbar items */
+        }
     </style>
     <script>
         function getStarted() {
@@ -86,6 +94,17 @@
                     <li class="nav-item">
                         <a class="nav-link" href="#">Contact</a>
                     </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <img src="https://via.placeholder.com/40" class="avatar" alt="User Avatar"> 
+                            <span th:text="${user.username}">Username</span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                            <li><a class="dropdown-item" href="/profile">Profile</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" th:href="@{/logout}">Logout</a></li>
+                        </ul>
+                    </li>
                 </ul>
             </div>
         </div>
@@ -106,7 +125,7 @@
         <div class="row">
             <div class="col-md-4">
                 <div class="card mb-4">
-                    <img src="/images/feature1.jpg" class="card-img-top" alt="Feature 1">
+                    <img src="/images/feature1.png" class="card-img-top" alt="Feature 1">
                     <div class="card-body">
                         <h5 class="card-title">Secure Backup</h5>
                         <p class="card-text">Keep your data safe with our secure backup solutions.</p>
@@ -115,7 +134,7 @@
             </div>
             <div class="col-md-4">
                 <div class="card mb-4">
-                    <img src="/images/feature2.jpg" class="card-img-top" alt="Feature 2">
+                    <img src="/images/feature2.png" class="card-img-top" alt="Feature 2">
                     <div class="card-body">
                         <h5 class="card-title">Easy Restore</h5>
                         <p class="card-text">Quickly restore your data with just a few clicks.</p>
@@ -124,7 +143,7 @@
             </div>
             <div class="col-md-4">
                 <div class="card mb-4">
-                    <img src="/images/feature3.jpg" class="card-img-top" alt="Feature 3">
+                    <img src="/images/feature3.png" class="card-img-top" alt="Feature 3">
                     <div class="card-body">
                         <h5 class="card-title">Cloud Integration</h5>
                         <p class="card-text">Seamlessly integrate with your favorite cloud services.</p>

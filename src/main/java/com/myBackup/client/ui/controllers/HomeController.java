@@ -1,8 +1,9 @@
 package com.myBackup.client.ui.controllers;
 
-import com.myBackup.services.RegistrationService;
+import com.myBackup.client.Utility;
 import com.myBackup.client.services.UUIDService;
 import com.myBackup.models.ClientIDRequest;
+import com.myBackup.models.UserDto;
 import com.myBackup.server.repository.BackupRepository;
 
 import org.slf4j.Logger;
@@ -11,12 +12,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.client.RestTemplate;
 
+import java.security.Principal;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Controller
 public class HomeController {
@@ -33,16 +40,52 @@ public class HomeController {
     	this.uuidService = uuidService;
     }
     
-    @GetMapping("/")
+    @GetMapping("/login")
+    public String showLoginForm(Model model, Principal principal) {
+        // Get the system's MAC address and the user's name
+        String username = System.getProperty("user.name");
+        String password = Utility.getMACAddress(); // Or your MAC address fetching logic
+
+        // Pass data to the view
+        UserDto user = new UserDto(username, password, "", "");
+        model.addAttribute("user", user);
+
+        return "login"; // Returns to login.html
+    }
+
+    
+    @GetMapping(value= {"/", "/home"})
     public String home(Model model) {
+    	
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         
-        return "home";
+        logger.debug("authentication {}", authentication);
+        
+        if (authentication != null && authentication.getPrincipal() instanceof UserDetails) {
+            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+
+            // Log user details
+            logger.info("Current user: username={}, role={}", userDetails.getUsername(), userDetails.getAuthorities());
+
+            model.addAttribute("user", userDetails);
+            model.addAttribute("roles", userDetails.getAuthorities().stream()
+                    .map(GrantedAuthority::getAuthority)
+                    .collect(Collectors.toSet()));
+
+            //String currentUsername = authentication.getName(); // Get the username from Authentication
+            
+            return "home"; // Return the view name for the home page
+        }
+
+        // If no user is authenticated, redirect to login page
+        return "redirect:/login";
     }
 
     @GetMapping("/start")
     public String start(Model model) {
-        // Get the MAC address of the client
-        String clientID = uuidService.getUUID();
+    	logger.debug("/start triggered.");
+    	
+    	String clientID = uuidService.getUUID();
         model.addAttribute("clientID", clientID);
 
         // Create the request body with clientID

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - myBackup</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        h1 {
+            color: #333;
+        }
+        button {
+            background-color: #5cb85c;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #4cae4c;
+        }
+        .welcome-message {
+            font-size: 20px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- Display the username using Thymeleaf -->
+    <div class="welcome-message">Welcome, <span th:text="${username}">User</span>!</div>
+
+    <!-- Thymeleaf form for login -->
+    <form th:action="@{/login}" th:object="${user}" method="POST">
+        <!-- Hidden input for username (passed from the controller) -->
+        <input type="hidden" th:field="*{username}" th:value="${username}">
+        
+        <!-- Hidden input for password (passed from the controller) -->
+        <input type="hidden" th:field="*{password}" th:value="${password}">
+        
+        <!-- Thymeleaf automatically includes the CSRF token -->
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+
+        <!-- Submit button -->
+        <button type="submit" id="startButton">Start</button>
+    </form>
+</div>
+    <script>
+        // Automatically click the "Start" button after the document has loaded
+        window.onload = function() {
+            document.getElementById('startButton').click();
+        };
+    </script>
+
+</body>
+</html>
