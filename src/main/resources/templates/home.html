@@ -6,65 +6,88 @@
     <title>My Backup Home</title>
     <link rel="stylesheet" href="/css/bootstrap.min.css">
     <style>
-        /* Custom Styles */
+        /* Custom Styles inspired by Apple */
         body {
-            background-color: #f8f9fa; /* Light gray background */
+            background-color: #ffffff; /* Clean white background */
+            color: #333333; /* Dark gray text for better contrast */
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; /* Apple system font */
         }
 
         .navbar {
-            background-color: #343a40; /* Dark background for navbar */
+            background-color: #f8f8f8; /* Light gray background for navbar */
+            border-bottom: 1px solid #e6e6e6; /* Subtle border for separation */
         }
 
         .navbar-brand,
         .nav-link {
-            color: #ffffff !important; /* White text color for navbar */
+            color: #333333 !important; /* Dark gray text for navbar */
         }
 
         .navbar-brand:hover,
         .nav-link:hover {
-            color: #d4d4d4 !important; /* Light gray on hover */
+            color: #0071e3 !important; /* Blue hover effect similar to Apple's links */
         }
 
         .hero-section {
-            background: linear-gradient(to right, #007bff, #6f42c1); /* Gradient background */
-            color: white;
+            background-color: #f5f5f7; /* Soft light gray background for hero section */
+            color: #333333; /* Dark gray text for readability */
+            padding: 60px 0;
         }
 
         .hero-section h1 {
             font-weight: 700; /* Bold text */
+            color: #333333; /* Dark text to stand out */
         }
 
         .hero-section p {
-            font-size: 1.25rem; /* Larger font size */
+            font-size: 1.5rem; /* Slightly larger font for clarity */
+            color: #6e6e73; /* Medium gray for secondary text */
+        }
+
+        .btn-light {
+            background-color: #0071e3; /* Apple-style blue button */
+            color: #ffffff;
+            border: none;
+        }
+
+        .btn-light:hover {
+            background-color: #005bb5; /* Darker blue on hover */
+            color: #ffffff;
         }
 
         .card {
-            transition: transform 0.2s; /* Smooth scale effect */
+            background-color: #f8f8f8; /* Light gray card background */
+            border: none; /* No border for clean look */
+            transition: transform 0.2s, box-shadow 0.2s; /* Smooth transition effects */
         }
 
         .card:hover {
             transform: scale(1.05); /* Scale effect on hover */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Light shadow for hover effect */
         }
 
         footer {
-            background-color: #343a40; /* Dark background for footer */
-            color: #ffffff; /* White text color for footer */
+            background-color: #f8f8f8; /* Light gray background for footer */
+            color: #333333; /* Dark gray text for footer */
+            padding: 20px 0;
         }
 
         footer a {
-            color: #ffffff; /* White text color for footer links */
+            color: #0071e3; /* Blue color for footer links */
+            text-decoration: none;
         }
 
         footer a:hover {
-            color: #d4d4d4; /* Light gray on hover */
+            color: #005bb5; /* Darker blue on hover */
+        }
+
+        .profile-img {
+            width: 40px; /* Set desired width */
+            height: 40px; /* Set desired height */
+            border-radius: 50%; /* Make the image round */
+            margin-left: 10px; /* Space between navbar items */
         }
     </style>
-    <script>
-        function getStarted() {
-            // Redirect to the /start endpoint
-            window.location.href = '/start';
-        }
-    </script>
 </head>
 <body>
 
@@ -92,11 +115,13 @@
     </nav>
 
     <!-- Hero Section -->
-    <header class="hero-section text-center py-5">
+    <header class="hero-section text-center">
         <div class="container">
             <h1 class="display-4">Welcome to MyBackup</h1>
             <p class="lead">Your data is safe with us. Backup and restore made easy.</p>
-            <a href="javascript:void(0);" class="btn btn-light btn-lg" onclick="getStarted()">Get Started</a>
+            <form action="/start" method="get">
+                <button type="submit" class="btn btn-light btn-lg">Get Started</button>
+            </form>
         </div>
     </header>
 
@@ -106,7 +131,7 @@
         <div class="row">
             <div class="col-md-4">
                 <div class="card mb-4">
-                    <img src="/images/feature1.jpg" class="card-img-top" alt="Feature 1">
+                    <img src="/images/secure-backup.webp" class="card-img-top" alt="Feature 1">
                     <div class="card-body">
                         <h5 class="card-title">Secure Backup</h5>
                         <p class="card-text">Keep your data safe with our secure backup solutions.</p>
@@ -115,7 +140,7 @@
             </div>
             <div class="col-md-4">
                 <div class="card mb-4">
-                    <img src="/images/feature2.jpg" class="card-img-top" alt="Feature 2">
+                    <img src="/images/feature2.png" class="card-img-top" alt="Feature 2">
                     <div class="card-body">
                         <h5 class="card-title">Easy Restore</h5>
                         <p class="card-text">Quickly restore your data with just a few clicks.</p>
@@ -124,7 +149,7 @@
             </div>
             <div class="col-md-4">
                 <div class="card mb-4">
-                    <img src="/images/feature3.jpg" class="card-img-top" alt="Feature 3">
+                    <img src="/images/feature3.png" class="card-img-top" alt="Feature 3">
                     <div class="card-body">
                         <h5 class="card-title">Cloud Integration</h5>
                         <p class="card-text">Seamlessly integrate with your favorite cloud services.</p>

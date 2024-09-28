@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - myBackup</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f5f5f7; /* Light background similar to Apple's */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background-color: white;
+            padding: 40px 30px;
+            border-radius: 12px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 350px; /* Set a fixed width for the login box */
+        }
+        .logo {
+            max-width: 150px; /* Logo size */
+            margin-bottom: 20px;
+        }
+        h1 {
+            font-size: 24px;
+            color: #333;
+            margin: 10px 0;
+        }
+        .welcome-message {
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 20px;
+        }
+        input[type="text"], input[type="password"] {
+            width: 80%; /* Set the width to 80% for more space */
+            padding: 12px 10px; /* Added padding for better appearance */
+            margin: 10px auto; /* Center the input fields */
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border 0.3s;
+            display: block; /* Ensure inputs are block elements */
+        }
+        input[type="text"]:focus, input[type="password"]:focus {
+            border-color: #0071e3; /* Focus color */
+            outline: none;
+        }
+        button {
+            background-color: #0071e3; /* Apple blue color */
+            color: white;
+            padding: 14px 20px; /* Increased padding for a longer button */
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+            width: 85%; /* Set button width to 85% for a better fit */
+            margin-top: 20px; /* Increased space above the button */
+        }
+        button:hover {
+            background-color: #005bb5; /* Darker shade on hover */
+        }
+        .footer {
+            margin-top: 20px;
+            font-size: 12px;
+            color: #999;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- Logo at the top -->
+    <img src="path/to/your/logo.png" alt="myBackup Logo" class="logo">
+    
+    <h1>Login to myBackup</h1>
+    <div class="welcome-message">Please enter your credentials</div>
+
+    <!-- Thymeleaf form for login -->
+    <form th:action="@{/login}" method="POST">
+        <!-- Input for username -->
+        <input type="text" name="username" placeholder="Username" required>
+        
+        <!-- Input for password -->
+        <input type="password" name="password" placeholder="Password" required>
+        
+        <!-- Thymeleaf automatically includes the CSRF token -->
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+
+        <!-- Submit button -->
+        <button type="submit">Start</button>
+    </form>
+
+    <div class="footer">
+        &copy; 2024 myBackup. All rights reserved.
+    </div>
+</div>
+
+</body>
+</html>

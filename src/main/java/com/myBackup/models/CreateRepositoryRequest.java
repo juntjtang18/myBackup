@@ -1,6 +1,8 @@
-package com.myBackup.models;
+	package com.myBackup.models;
 
 public class CreateRepositoryRequest {
+	private String serverUrl;
+	private String serverName;
     private String destDirectory;
     private String clientID;
 
@@ -20,4 +22,20 @@ public class CreateRepositoryRequest {
     public void setClientID(String clientID) {
         this.clientID = clientID;
     }
+
+	public String getServerUrl() {
+		return serverUrl;
+	}
+
+	public void setServerUrl(String serverUrl) {
+		this.serverUrl = serverUrl;
+	}
+
+	public String getServerName() {
+		return serverName;
+	}
+
+	public void setServerName(String serverName) {
+		this.serverName = serverName;
+	}
 }

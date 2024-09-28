@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Create Backup Repository</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+<div class="container mt-5">
+    <h2>Create Backup Repository</h2>
+    <form id="createRepoForm">
+        <!-- Include CSRF token for protection -->
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+        <div class="form-group">
+            <label for="serverUrl">Select Server URL:</label>
+            <select id="serverUrl" name="serverUrl" class="form-control" required onchange="updateServerName()">
+                <option value="" disabled selected>Select a server</option>
+                <th:block th:each="server : ${servers}">
+                    <option th:value="${server.serverUrl}" th:text="${server.aliasName} + ' : ' + ${server.serverUrl}" th:data-server-name="${server.aliasName}"></option>
+                </th:block>
+            </select>
+        </div>
+        
+        <!-- Hidden serverName input field -->
+        <input type="hidden" id="serverName" name="serverName" required>
+
+        <div class="form-group">
+            <label for="destDirectory">Destination Directory:</label>
+            <input type="text" id="destDirectory" name="destDirectory" class="form-control" required placeholder="Enter destination directory">
+        </div>
+        
+        <input type="hidden" id="clientID" name="clientID" th:value="${clientID}"> <!-- Use the clientID from the model -->
+        <button type="button" class="btn btn-primary" onclick="checkAndCreateRepository()">Create Repository</button>
+    </form>
+
+    <div id="loadingIndicator" style="display: none;">
+        <p>Creating repository... <img src="spinner.gif" alt="Loading..."></p>
+    </div>
+    <div id="message" style="display: none;"></div>
+
+    <!-- Confirmation Modal -->
+    <div class="modal fade" id="confirmModal" tabindex="-1" role="dialog" aria-labelledby="confirmModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="confirmModalLabel">Confirm Directory Exists</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p id="confirmMessage">The directory exists. Do you want to proceed with creating the repository?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="confirmButton">Confirm</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let requestBody; // Global variable to store request data
+
+    function updateServerName() {
+        const serverUrlSelect = document.getElementById('serverUrl');
+        const serverNameInput = document.getElementById('serverName');
+        const selectedOption = serverUrlSelect.options[serverUrlSelect.selectedIndex];
+
+        // If there's a selected option, update the serverName input value
+        if (selectedOption.value) {
+            serverNameInput.value = selectedOption.getAttribute('data-server-name');
+        } else {
+            serverNameInput.value = ''; // Clear input if no selection
+        }
+    }
+
+    function checkAndCreateRepository() {
+        const form = document.getElementById('createRepoForm');
+        const submitButton = form.querySelector('button');
+        submitButton.disabled = true; // Disable submit button
+
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        loadingIndicator.style.display = 'block'; // Show loading indicator
+
+        const formData = new FormData(form);
+        const csrfToken = document.querySelector('input[name="_csrf"]').value; // Get the CSRF token
+        requestBody = {
+            serverUrl: formData.get('serverUrl'),
+            serverName: formData.get('serverName'), // This will still get the value even if it's hidden
+            destDirectory: formData.get('destDirectory'),
+            clientID: formData.get('clientID') // Include clientID from the form
+        };
+
+        fetch('/api/repositories/create', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrfToken  // Add the CSRF token to the header
+            },
+            body: JSON.stringify(requestBody)
+        })
+        .then(response => {
+            loadingIndicator.style.display = 'none'; // Hide loading indicator
+            submitButton.disabled = false; // Re-enable submit button
+            if (response.ok) {
+                return response.text(); // Expect a string response
+            }
+            throw new Error('Network response was not ok ' + response.statusText);
+        })
+        .then(data => {
+            // If the directory exists, show the modal
+            if (data.includes("Please confirm")) {
+                document.getElementById('confirmMessage').innerText = data;
+                $('#confirmModal').modal('show'); // Show the confirmation modal
+            } else {
+                document.getElementById('message').innerText = data; // Display success message
+                document.getElementById('message').style.color = 'green';
+                document.getElementById('message').style.display = 'block';
+                setTimeout(() => {
+                    window.location.href = '/success-page'; // Redirect after a short delay
+                }, 2000);
+            }
+        })
+        .catch(error => {
+            loadingIndicator.style.display = 'none'; // Hide loading indicator
+            submitButton.disabled = false; // Re-enable submit button
+            document.getElementById('message').innerText = 'Error: ' + error.message;
+            document.getElementById('message').style.color = 'red';
+            document.getElementById('message').style.display = 'block';
+        });
+    }
+
+    document.getElementById('confirmButton').addEventListener('click', function() {
+        createConfirmedRepository(requestBody);
+        $('#confirmModal').modal('hide'); // Hide the modal after confirmation
+    });
+
+    function createConfirmedRepository(requestBody) {
+        const csrfToken = document.querySelector('input[name="_csrf"]').value; // Get the CSRF token
+
+        fetch('/api/repositories/create/confirm', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrfToken  // Add the CSRF token to the header
+            },
+            body: JSON.stringify(requestBody)
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok ' + response.statusText);
+            }
+            return response.json();
+        })
+        .then(data => {
+            document.getElementById('message').innerText = 'Repository created successfully!';
+            document.getElementById('message').style.color = 'green';
+            document.getElementById('message').style.display = 'block';
+            setTimeout(() => {
+                window.location.href = '/success-page'; // Redirect after a short delay
+            }, 2000);
+        })
+        .catch(error => {
+            document.getElementById('message').innerText = 'Error: ' + error.message;
+            document.getElementById('message').style.color = 'red';
+            document.getElementById('message').style.display = 'block';
+        });
+    }
+</script>
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

@@ -2,26 +2,28 @@ package com.myBackup.client.services;
 
 import org.springframework.stereotype.Service;
 
+import com.myBackup.config.Config;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.file.Paths;
 import java.util.UUID;
 
 @Service
 public class UUIDService {
-    private static final String UUID_FILE_PATH = Paths.get(System.getProperty("user.dir"), "config", "client", "uuid.id").toString();
+	private Config config;
     private final String uuid;
 
-    public UUIDService() {
+    public UUIDService(Config config) {
+    	this.config = config;
         this.uuid = loadOrGenerateUUID();
     }
 
     private String loadOrGenerateUUID() {
-        File uuidFile = new File(UUID_FILE_PATH);
+        File uuidFile = new File(config.getUuidFilePath());
         // Ensure the config directory exists
         File parentDir = uuidFile.getParentFile();
         if (!parentDir.exists()) {

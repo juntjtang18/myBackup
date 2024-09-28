@@ -1,4 +1,4 @@
-package com.myBackup.client.services;
+package com.myBackup.about_to_delete;
 
 import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;
@@ -12,9 +12,13 @@ import java.io.IOException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
-@Component
+import com.myBackup.client.services.ServerRegistrationService;
+
+//@Order(2)
+//@Component
 public class ServerRegistrationFilter implements Filter {
     
     private static final Logger logger = LoggerFactory.getLogger(ServerRegistrationFilter.class);
