@@ -14,77 +14,100 @@
     <!-- Custom CSS -->
     <style>
         body {
-            background-color: #f8f9fa;
-            font-family: Arial, sans-serif;
+            background-color: #f5f5f7; /* Light gray background */
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; /* Apple-like font stack */
+            color: #333; /* Dark text for better readability */
         }
 
         .navbar {
-            border-bottom: 1px solid #ddd;
-            margin-bottom: 20px;
+            background-color: #fff; /* White navbar */
+            border-bottom: 1px solid #ddd; /* Subtle border */
         }
 
         .navbar-brand {
             font-weight: bold;
+            color: #0071e3; /* Blue color for brand */
         }
 
-        .panel-title {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        .navbar-nav .nav-link {
+            color: #333; /* Dark text for nav links */
+        }
+
+        .navbar-nav .nav-link:hover {
+            color: #0071e3; /* Blue on hover */
         }
 
         .panel {
-            border: 1px solid #ddd;
-            border-radius: 8px;
+            border: none; /* No border for a cleaner look */
+            background-color: #fff; /* White background for panels */
             padding: 20px;
             margin-top: 20px;
-            background-color: #fff;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+            border-radius: 12px; /* Rounded corners */
+        }
+
+        .panel-title {
+            margin-bottom: 10px;
+        }
+
+		.repository-container {
+		    display: flex;
+		    flex-wrap: wrap; /* Allows cards to wrap to the next row */
+		    gap: 10px; /* Reduced space between cards */
+		    justify-content: flex-start; /* Align cards to the left */
+		}
+		
+		.repository-card {
+		    flex: 1 1 160px; /* Allow each card to grow and shrink, set the base width to 200px */
+		    max-width: 180px; /* Set a max width to prevent cards from growing too large */
+		    border: 1px solid #ccc;
+		    border-radius: 5px;
+		    padding: 10px;
+		    margin: 10px; /* Space between cards */
+		    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+		    font-size: 14px; /* Smaller font size for the card text */
+		}
+
+        .repository-card:hover {
+            transform: translateY(-2px); /* Lift effect on hover */
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* Enhanced shadow on hover */
+        }
+
+        .btn-add, .btn-new-job {
+            background-color: #0071e3; /* Apple blue for buttons */
+            color: white;
+            border: none;
+            border-radius: 8px; /* Rounded corners */
+            padding: 10px 16px;
+            font-size: 1rem;
+            transition: background-color 0.2s;
+        }
+        
+		html {
+		    font-size: 14px; /* Decreased font size by 2px globally */
+		}
+		
+		body {
+		    font-size: 1rem; /* Default size set to the new base */
+		}
+		
+        .btn-add:hover, .btn-new-job:hover {
+            background-color: #005bb5; /* Darker blue on hover */
         }
 
         .progress {
             height: 20px;
+            border-radius: 10px; /* Rounded corners */
         }
 
         .progress-bar {
-            background-color: #007bff;
+            background-color: #0071e3; /* Blue progress bar */
+            border-radius: 10px; /* Rounded corners */
         }
 
-        .no-tasks {
-            color: #999;
-            font-style: italic;
-            text-align: center;
-            padding: 10px;
-        }
-
-        .btn-add, .btn-new-job {
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            padding: 3px 14px;
-            font-size: 1rem;
-        }
-
-        .btn-new-job:hover {
-            background-color: #0056b3;
-        }
-
-        .avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            margin-left: 10px;
-        }
-
-        /* DataTable enhancements */
         .table th {
-            background-color: #007bff;
+            background-color: #0071e3; /* Blue for table headers */
             color: white;
-        }
-        
-        .table th, .table td {
-            vertical-align: middle;
         }
 
         .table td {
@@ -92,8 +115,46 @@
         }
 
         .table-hover tbody tr:hover {
-            background-color: #f1f1f1;
+            background-color: #f1f1f1; /* Light gray on row hover */
         }
+        #repository-container {
+            display: flex;
+            flex-wrap: wrap; /* Allows cards to wrap to the next row */
+            justify-content: flex-start; /* Align cards to the left */
+        }
+        
+        .btn-add {
+            margin-top: 10px; /* Space above the button */
+        }
+
+		/* Specific styling for the add-repo-card */
+		.add-repo-card {
+		    display: flex;
+		    flex-direction: column;
+		    align-items: center;
+		    justify-content: center;
+		    cursor: pointer;
+		    background-color: #f0f0f0; /* Adjust the background as needed */
+		    border: 2px dashed #ccc; /* Dashed border to resemble an "add" card */
+		    transition: background-color 0.3s ease;
+		}
+		
+		.add-repo-card:hover {
+		    background-color: #e0e0e0; /* Darken slightly on hover */
+		}
+		
+		.add-repo-card .plus-sign {
+		    font-size: 3rem; /* Adjust the size of the "+" */
+		    color: #777;
+		    margin-bottom: 10px;
+		}
+		
+		.add-repo-card h5 {
+		    font-size: 1.2rem;
+		    margin: 0;
+		    color: #555;
+		}
+
     </style>
 </head>
 <body>
@@ -110,11 +171,6 @@
                     <li class="nav-item">
                         <a class="nav-link" href="#">Home</a>
                     </li>
-                    <!-- 
-                    <li class="nav-item" th:if="${roles.contains('ROLE_ADMIN')}">
-                        <a class="nav-link" href="/admin/users">Users</a>
-                    </li>
-                     -->
                 </ul>
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item dropdown">
@@ -141,14 +197,19 @@
                 <h4>Backup Task Ongoing</h4>
             </div>
             <div id="progress-container">
-            	<!-- Progress bars will be dynamically added here -->
-        	</div>
+                <!-- Progress bars will be dynamically added here -->
+            </div>
         </div>
         
         <!-- Backup Repository List Section -->
         <div class="panel" id="repository-list-panel">
+            <div class="panel-title">
+                <h4>Backup Repositories</h4>
+            </div>
+            <div class="repository-container" id="repository-container">
+                <!-- Repository rectangles will be dynamically added here -->
+            </div>
         </div>
-
     </div>
 
     <!-- Include SockJS -->
@@ -165,136 +226,123 @@
     <span id="client-id" data-client-id="${clientID}" style="display:none;"></span>
     
     <!-- JavaScript -->
-	<script th:inline="javascript">
-	    document.addEventListener("DOMContentLoaded", function() {
-	        // Initialize job table (if necessary for other tables)
-	        $('#jobTable').DataTable({
-	            "paging": true,
-	            "pageLength": 10,
-	            "searching": true,
-	            "ordering": true
-	        });
-	        
-	        // WebSocket setup for backup progress updates (as per original code)
-	        const socket = new SockJS('/backup-progress-websocket');
-	        const stompClient = Stomp.over(socket);
-	
-	        stompClient.connect({}, function(frame) {
-	            stompClient.subscribe('/topic/backupProgress', function(message) {
-	                const event = JSON.parse(message.body);
-	                updateBackupTasks(event);
-	            });
-	        });
-	
-	        // Fetch and display the repositories using POST request
-	        fetchRepositories();
-	    });
-	
-	    // Function to fetch repositories with POST request
-		function fetchRepositories() {
-		    // Retrieve the CSRF token from the meta tag
-		    const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
-		    const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
-		
-		    // Get clientID from the data attribute in the hidden span
-	        var clientID = /*[[${clientID}]]*/ 'defaultClientID';
-	        console.log("Client ID: " + clientID);
-			
-		    // Create the payload object with clientID
-		    const clientIDRequest = {
-		        clientID: clientID
-		    };
-			console.log(JSON.stringify(clientIDRequest));
-			
-		    // Make a POST request to fetch repositories
-		    fetch('/api/repositories/list-by-clientID', {
-		        method: 'POST',  // Use POST method
-		        headers: {
-		            'Content-Type': 'application/json',  // Ensure JSON format
-		            [csrfHeader]: csrfToken              // Include the CSRF token in the headers
-		        },
-		        body: JSON.stringify(clientIDRequest)   // Send clientIDRequest as the request body
-		    })
-		    .then(response => {
-		        if (!response.ok) {
-		            throw new Error('Network response was not ok');
-		        }
-		        return response.json();  // Parse the JSON response
-		    })
-		    .then(data => {
-		        console.log(data);
-		        const panel = document.getElementById('repository-list-panel');
-		        panel.innerHTML = '';  // Clear existing content
-		
-		        data.forEach(repo => {
-		            const row = document.createElement('div');
-		            row.className = 'row repository-row mb-3 p-2 bg-light border rounded';
-		
-		            const icon = document.createElement('div');
-		            icon.className = 'col-2 text-center';
-		            icon.innerHTML = '<i class="fas fa-folder fa-3x"></i>';  // Icon for the repository
-		
-		            const details = document.createElement('div');
-		            details.className = 'col-10';
-		            details.innerHTML = `
-		            	<strong>Server Name:</strong> ${repo.serverName}<br>
-		                <strong>Server URL:</strong> ${repo.serverUrl}<br>
-		                <strong>Destination Directory:</strong> ${repo.destDirectory}
-		            `;
-		
-		            row.appendChild(icon);
-		            row.appendChild(details);
-		            panel.appendChild(row);
-		        });
-		    })
-		    .catch(error => {
-		        console.error('Error fetching repositories:', error);
-		    });
-		}
+    <script th:inline="javascript">
+        document.addEventListener("DOMContentLoaded", function() {
+            // Initialize job table (if necessary for other tables)
+            $('#jobTable').DataTable({
+                "paging": true,
+                "pageLength": 10,
+                "searching": true,
+                "ordering": true
+            });
+            
+            // WebSocket setup for backup progress updates
+            const socket = new SockJS('/backup-progress-websocket');
+            const stompClient = Stomp.over(socket);
 
-	
-	    // Function to update ongoing backup tasks based on WebSocket messages (kept as per original code)
-	    function updateBackupTasks(data) {
-	        const taskId = data.backupTask.taskId;
-	
-	        if (tasks[taskId]) {
-	            tasks[taskId].progressPercentage = data.progressPercentage;
-	            updateProgressBar(taskId, data.progressPercentage, data.backupTask.status);
-	        } else {
-	            tasks[taskId] = {
-	                backupTask: data.backupTask,
-	                progressPercentage: data.progressPercentage
-	            };
-	            createProgressBar(taskId, data.backupTask.sourceDirectory, data.progressPercentage);
-	        }
-	    }
-	
-	    // Function to create and update progress bars (kept as per original code)
-	    function createProgressBar(taskId, sourceDirectory, progressPercentage) {
-	        const container = document.getElementById("progress-container");
-	        const taskElement = document.createElement("div");
-	        taskElement.className = "progress mt-2";
-	        taskElement.id = "task-" + taskId;
-	
-	        const progressBar = document.createElement("div");
-	        progressBar.className = "progress-bar";
-	        progressBar.role = "progressbar";
-	        progressBar.style.width = progressPercentage + "%";
-	        progressBar.innerText = sourceDirectory;
-	
-	        taskElement.appendChild(progressBar);
-	        container.appendChild(taskElement);
-	    }
-	
-	    function updateProgressBar(taskId, progressPercentage, status) {
-	        const progressBar = document.getElementById("task-" + taskId).querySelector(".progress-bar");
-	        progressBar.style.width = progressPercentage + "%";
-	        
-	        if (status === "COMPLETED") {
-	            progressBar.classList.add("bg-success");
-	        }
-	    }
-	</script>
+            stompClient.connect({}, function(frame) {
+                stompClient.subscribe('/topic/backupProgress', function(message) {
+                    const event = JSON.parse(message.body);
+                    updateBackupTasks(event);
+                });
+            });
 
+            // Fetch and display the repositories using POST request
+            fetchRepositories();
+        });
+
+        function fetchRepositories() {
+            const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+            const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
+            var clientID = /*[[${clientID}]]*/ 'defaultClientID';
+            console.log("Client ID: " + clientID);
+
+            const clientIDRequest = {
+                clientID: clientID
+            };
+            console.log(JSON.stringify(clientIDRequest));
+
+            fetch('/api/repositories/list-by-clientID', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    [csrfHeader]: csrfToken
+                },
+                body: JSON.stringify(clientIDRequest)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log(data);
+                displayRepositories(data);
+            })
+            .catch(error => {
+                console.error('Error fetching repositories:', error);
+            });
+        }
+
+        function displayRepositories(repositories) {
+            const container = document.getElementById("repository-container");
+            container.innerHTML = ''; // Clear previous content
+
+            repositories.forEach(repo => {
+                const repoCard = document.createElement("div");
+                repoCard.classList.add("repository-card");
+                repoCard.innerHTML = `
+                    <h5>${repo.serverName}</h5>
+                    <p>URL: ${repo.serverUrl}</p>
+                    <p>Destination: ${repo.destDirectory}</p>
+                `;
+                container.appendChild(repoCard);
+            });
+            
+         // Create a form element
+            const form = document.createElement("form");
+            form.method = "GET";  // Set form method to GET
+            form.action = "/repository-create";  // Set the form action to your desired endpoint
+
+            // Create the "Add Repository" card
+            const addRepoCard = document.createElement("div");
+            addRepoCard.classList.add("repository-card", "add-repo-card");
+            addRepoCard.innerHTML = `
+                <span class="plus-sign">+</span>
+                <h5>Add New Repository</h5>
+            `;
+
+            // Add a click event to the card that submits the form
+            addRepoCard.onclick = function() {
+                form.submit();  // Submit the form when the card is clicked
+            };
+
+            // Append the card to the form
+            form.appendChild(addRepoCard);
+
+            // Append the form to the container
+            container.appendChild(form);
+        }
+     
+        // Function to add a repository (to be implemented)
+        function addRepository() {
+            console.log("Add repository button clicked");
+            // Implement repository addition logic here
+        }
+
+        // Function to update backup tasks
+        function updateBackupTasks(event) {
+            const progressContainer = document.getElementById("progress-container");
+            const progressBar = document.createElement("div");
+            progressBar.classList.add("progress");
+            progressBar.innerHTML = `
+                <div class="progress-bar" role="progressbar" style="width: ${event.progress}%" aria-valuenow="${event.progress}" aria-valuemin="0" aria-valuemax="100">
+                    ${event.taskName} - ${event.progress}%
+                </div>
+            `;
+            progressContainer.appendChild(progressBar);
+        }
+    </script>
 </body>
 </html>
