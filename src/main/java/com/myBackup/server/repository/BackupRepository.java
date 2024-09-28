@@ -1,6 +1,5 @@
 package com.myBackup.server.repository;
 
-
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -22,14 +21,17 @@ public class BackupRepository {
     private String destDirectory; // Renamed variable
     private final Map<String, BackupJob> jobs; // Map of jobs
     private final Set<String> clientIDs;
-
+    private String serverUrl; // New attribute
+    private String serverName;
 
     // Constructor
     public BackupRepository() {
         this.repoID = UUID.randomUUID().toString();
-		this.destDirectory = "";
+        this.destDirectory = "";
         this.jobs = Collections.synchronizedMap(new HashMap<>()); // Synchronized map for thread safety
         this.clientIDs = Collections.synchronizedSet(new HashSet<>()); // Synchronized set for thread safety
+        this.serverUrl = ""; 
+        this.serverName = "";
     }
     
     // Get the destination directory of the repository
@@ -65,9 +67,27 @@ public class BackupRepository {
     public boolean hasJob(String jobID) {
         return jobs.containsKey(jobID);
     }
-    
+
+    // Check if the repository is accessible to a specific client
     public boolean isAccessibleTo(String clientID) {
-    	return clientIDs.contains(clientID);
+        return clientIDs.contains(clientID);
     }
-    
+
+    // Getter for serverUrl
+    public String getServerUrl() {
+        return serverUrl;
+    }
+
+    // Setter for serverUrl
+    public void setServerUrl(String serverUrl) {
+        this.serverUrl = serverUrl;
+    }
+
+	public String getServerName() {
+		return serverName;
+	}
+	
+	public void setServerName(String serverName) {
+		this.serverName = serverName;
+	}
 }

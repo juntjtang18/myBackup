@@ -38,6 +38,19 @@ public class UserRepositoryFileImpl implements UserRepository {
     @Override
     public synchronized void save(User user) throws IOException {
         String usersFilePath = getUsersFilePath();
+        Path filePath = Paths.get(usersFilePath);
+        Path directoryPath = filePath.getParent(); // Get the directory path
+
+        // Check if the directory exists; if not, create it
+        if (directoryPath != null && !Files.exists(directoryPath)) {
+            Files.createDirectories(directoryPath);
+        }
+
+        // Check if the file exists; if not, create it
+        if (!Files.exists(filePath)) {
+            Files.createFile(filePath);
+        }
+
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(usersFilePath, true))) {
             // Check if user already exists
             for (User existingUser : users) {
@@ -53,7 +66,7 @@ public class UserRepositoryFileImpl implements UserRepository {
             users.add(user);
         }
     }
-
+    
     @Override
     public void create() throws IOException {
         String usersFilePath = getUsersFilePath();

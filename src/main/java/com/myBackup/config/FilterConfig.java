@@ -4,7 +4,7 @@ import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.myBackup.client.services.ServerRegistrationFilter;
+import com.myBackup.about_to_delete.ServerRegistrationFilter;
 import com.myBackup.client.services.ServerRegistrationService;
 
 @Configuration

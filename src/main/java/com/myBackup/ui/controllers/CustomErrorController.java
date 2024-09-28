@@ -1,4 +1,4 @@
-package com.myBackup.server.controllers;
+package com.myBackup.ui.controllers;
 
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;

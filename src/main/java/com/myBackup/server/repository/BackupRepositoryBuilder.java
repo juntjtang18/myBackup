@@ -1,10 +1,6 @@
 package com.myBackup.server.repository;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.myBackup.server.repository.BackupRepository;
 import com.myBackup.models.BackupJob;
-import com.myBackup.server.repository.BackupRepositoriesService;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -13,10 +9,10 @@ import java.util.Map;
 import java.util.Set;
 
 public class BackupRepositoryBuilder {
-    private final BackupRepositoriesService service;
+    private final BackupRepositoryService service;
     private BackupRepository repository;
 
-    public BackupRepositoryBuilder(BackupRepositoriesService service) {
+    public BackupRepositoryBuilder(BackupRepositoryService service) {
         this.service = service;
         this.repository = service.buildRepository(); // Create a new repository instance
     }
@@ -61,6 +57,31 @@ public class BackupRepositoryBuilder {
         // Persist the updated client IDs
         persistClientIDs();
 
+        return this;
+    }
+
+    // New method: Connect to server and set serverUrl
+    public BackupRepositoryBuilder connectTo(String serverUrl, String serverName) {
+        // Validate serverUrl
+        if (serverUrl == null || serverUrl.isEmpty()) {
+            throw new IllegalArgumentException("Server URL must not be empty.");
+        }
+
+        // Set the server URL in the repository
+        repository.setServerUrl(serverUrl);
+        repository.setServerName(serverName);
+        return this;
+    }
+    
+    public BackupRepositoryBuilder connectTo(String serverUrl) {
+        // Validate serverUrl
+        if (serverUrl == null || serverUrl.isEmpty()) {
+            throw new IllegalArgumentException("Server URL must not be empty.");
+        }
+
+        // Set the server URL in the repository
+        repository.setServerUrl(serverUrl);
+        repository.setServerName("");
         return this;
     }
 

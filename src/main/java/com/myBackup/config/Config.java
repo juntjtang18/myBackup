@@ -21,12 +21,14 @@ public class Config {
     private static Config instance;
 
     private String jobsDirectory;
-    @SuppressWarnings("unused")
-	private String usersFilePath;
+    private String usersFilePath;
     private boolean encryptData;
-    private String backupRepositoryPath;
+    private String backupRepositoryFilePath;
+	private String metaDirectory;			// the directory storing the meta data files. critical
+	private String serversFilePath;			// the file records the servers, including localhost:8080
 	private int threadPoolSize;
-
+	private String uuidFilePath;
+	
     // Private constructor to prevent instantiation
     private Config() {
         // Load configurations during initialization
@@ -34,7 +36,6 @@ public class Config {
             String iniFilePath = getIniFilePath();
             logger.debug("Loading configuration from: " + iniFilePath);
             loadConfigurations(iniFilePath);
-            logger.debug("File Paths: usersFilePath: {}   jobsDirectory: {}  backupRepositoryPath: {} ", usersFilePath, jobsDirectory, backupRepositoryPath);
         } catch (IOException e) {
             logger.debug("Failed to load configuration", e);
         }
@@ -81,38 +82,17 @@ public class Config {
             throw e; // Re-throw the exception after logging
         }
 
-        // Retrieve and set values from the 'Paths' and 'settings' sections
-        String backupRepoPathFromIni = ini.get("Paths", "backupRepositoryPath");
-        this.backupRepositoryPath = Optional.ofNullable(backupRepoPathFromIni)
-            .filter(path -> !path.isEmpty())
-            .map(path -> new File(getAppDirectory(), path).getAbsolutePath())
-            .orElse(new File(getAppDirectory(), "backupRepository").getAbsolutePath());
-
-        // Ensure backup repository directory exists
-        File backupRepoDir = new File(backupRepositoryPath);
-        if (!backupRepoDir.exists()) {
-            if (backupRepoDir.mkdirs()) {
-                logger.info("Created backup repository directory: " + backupRepositoryPath);
-            } else {
-                logger.error("Failed to create backup repository directory: " + backupRepositoryPath);
-            }
-        }
-
-        // Set jobsDirectory and ensure it exists
-        this.jobsDirectory = new File(backupRepositoryPath, "jobs").getAbsolutePath();
-        File jobsDir = new File(jobsDirectory);
-        if (!jobsDir.exists()) {
-            if (jobsDir.mkdirs()) {
-                logger.info("Created jobs directory: " + jobsDirectory);
-            } else {
-                logger.error("Failed to create jobs directory: " + jobsDirectory);
-            }
-        }
-
-        // Set usersFilePath
-        this.usersFilePath = new File(backupRepositoryPath, "users.pwd").getAbsolutePath();
+        this.metaDirectory = Paths.get(getAppDirectory(),"meta").toString();
+        this.usersFilePath = new File(metaDirectory, "users.pwd").getAbsolutePath();
+        this.backupRepositoryFilePath = Paths.get(metaDirectory, "repositories.json").toString();
+        this.serversFilePath = Paths.get(metaDirectory,"servers.json").toString();
+        this.uuidFilePath = Paths.get(getAppDirectory(), "config", "uuid.id").toString();
+        
         this.encryptData = Boolean.parseBoolean(Optional.ofNullable(ini.get("settings", "encrypt_data")).orElse("false"));
         this.threadPoolSize = Integer.parseInt(Optional.ofNullable(ini.get("settings", "threadPoolSize")).orElse("5"));
+        
+        logger.info("File Paths: metaDirector: {} usersFilePath: {}  backupRepositoryFilePath: {}   serversFilePath: {}    uuidFilePath: {}", 
+        		                 metaDirectory, usersFilePath, backupRepositoryFilePath, serversFilePath, uuidFilePath);
     }
 
     public String getAppDirectory() {
@@ -130,12 +110,12 @@ public class Config {
             } else {
                 throw new IllegalStateException("Unsupported OS");
             }
-            logger.debug("Config::getAppDirectory() --- jarDir={}", jarDir);
+            //logger.debug("Config::getAppDirectory() --- jarDir={}", jarDir);
             
             // Check if the system property 'appDir' is set
             String appDir = System.getProperty("appDir");
             
-            logger.debug(" System.getProperty(appDir)={}", appDir);
+            //logger.debug(" System.getProperty(appDir)={}", appDir);
             
             if (appDir != null) {
                 return appDir;
@@ -159,7 +139,6 @@ public class Config {
     }
 
     public String getUsersFilePath() {
-        //return Paths.get(System.getProperty("user.dir"), "sys", "user.pwd").toString();
     	return usersFilePath;
     }
 
@@ -167,7 +146,32 @@ public class Config {
         return encryptData;
     }
 
-    public String getBackupRepositoryPath() {
-        return backupRepositoryPath;
+    public String getBackupRepositoryFilePath() {
+        return backupRepositoryFilePath;
     }
+
+	public String getMetaDirectory() {
+		return metaDirectory;
+	}
+
+	public void setMetaDirectory(String metaDirectory) {
+		this.metaDirectory = metaDirectory;
+	}
+
+	public String getServersFilePath() {
+		return serversFilePath;
+	}
+
+	public void setServersFilePath(String serversFilePath) {
+		this.serversFilePath = serversFilePath;
+	}
+
+	public String getUuidFilePath() {
+		return uuidFilePath;
+	}
+
+	public void setUuidFilePath(String uuidFilePath) {
+		this.uuidFilePath = uuidFilePath;
+	}
+
 }

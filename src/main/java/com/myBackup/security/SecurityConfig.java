@@ -29,6 +29,40 @@ public class SecurityConfig {
 	}
 	
     @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http
+            .authorizeRequests(authorizeRequests ->
+                authorizeRequests
+                .requestMatchers("/", "/login", "/login-auto", "/logout", "/css/**", "/js/**", "/fonts/**", "/icons/**", "/images/**")
+                .permitAll()
+                .requestMatchers("/swagger-ui/**")
+                .permitAll()
+                .anyRequest()
+                //.permitAll()
+                .authenticated() // All other requests require authentication
+            )
+            .formLogin(form -> form
+                    .loginPage("/login")
+                    .failureHandler(customAuthenticationFailureHandler()) // Ensure custom handler is used
+                    .defaultSuccessUrl("/home", true)
+                    .failureUrl("/login?error=true")
+                    .permitAll()
+            )
+            .logout()
+	            .logoutUrl("/logout")
+	            .logoutSuccessUrl("/login?logout=true")
+	            .invalidateHttpSession(true)
+	            .deleteCookies("JSESSIONID")
+	            .permitAll() // Ensure logout URL is accessible to all
+	            .and()
+            //.csrf().disable()
+            .exceptionHandling()
+            	.accessDeniedPage("/403");
+
+        return http.build();
+    }
+
+    @Bean
     public AuthenticationManager authManager(HttpSecurity http) throws Exception {
         AuthenticationManagerBuilder authenticationManagerBuilder = 
             http.getSharedObject(AuthenticationManagerBuilder.class);
@@ -52,32 +86,4 @@ public class SecurityConfig {
         return roleHierarchy;
     }
 
-    @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
-            .authorizeRequests(authorizeRequests ->
-                authorizeRequests
-                .requestMatchers("/", "/home", "/login", "/login-auto", "/logout", "/css/**", "/js/**", "/fonts/**", "/icons/**", "/images/**")
-                .permitAll()
-                .anyRequest().authenticated() // All other requests require authentication
-            )
-            .formLogin(form -> form
-                    .loginPage("/login")
-                    .failureHandler(customAuthenticationFailureHandler()) // Ensure custom handler is used
-                    .defaultSuccessUrl("/home", true)
-                    .failureUrl("/login?error=true")
-                    .permitAll()
-            )
-            .logout()
-	            .logoutUrl("/logout")
-	            .logoutSuccessUrl("/login?logout=true")
-	            .invalidateHttpSession(true)
-	            .deleteCookies("JSESSIONID")
-	            .permitAll() // Ensure logout URL is accessible to all
-	            .and()
-            .exceptionHandling()
-            	.accessDeniedPage("/403");
-
-        return http.build();
-    }
 }
