@@ -1,4 +1,4 @@
-package com.myBackup.server.job;
+package com.myBackup.services;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -100,6 +100,12 @@ public class JobService {
         return jobIds.stream()
                      .map(jobMap::get)
                      .collect(Collectors.toList());
+    }
+    
+    public List<BackupJob> getByRepositoryID(String repositoryID) {
+        return jobMap.values().stream()
+                .filter(job -> job.getRepositoryID().equals(repositoryID))
+                .collect(Collectors.toList());
     }
 
     public void addJob(BackupJob job) {

@@ -18,6 +18,7 @@ import com.myBackup.server.meta.ServersService;
 import com.myBackup.server.meta.ServersService.Server;
 import com.myBackup.server.repository.BackupRepository;
 import com.myBackup.server.repository.BackupRepositoryService;
+import com.myBackup.services.JobService;
 
 @Controller
 public class RepositoryController {
@@ -26,11 +27,13 @@ public class RepositoryController {
     private final UUIDService uuidService;
     private final BackupRepositoryService backupRepositoryService;
     private final ServersService serversService;
+    private final JobService jobService;
     
-    public RepositoryController(UUIDService uuidService, BackupRepositoryService backupRepositoryService, ServersService serversService) {
+    public RepositoryController(UUIDService uuidService, BackupRepositoryService backupRepositoryService, ServersService serversService, JobService jobService) {
     	this.uuidService = uuidService;
     	this.backupRepositoryService = backupRepositoryService;
     	this.serversService = serversService;
+    	this.jobService = jobService;
     }
     
     @GetMapping("/repository-create")
@@ -72,6 +75,8 @@ public class RepositoryController {
         model.addAttribute("clientID", clientID); // Add the clientID to the model
         List<BackupJob.JobType> jobTypes = Arrays.asList(BackupJob.JobType.values());
         model.addAttribute("jobTypes", jobTypes);
+        List<BackupJob> jobs = jobService.getByRepositoryID(repoId);
+        model.addAttribute("jobs", jobs);
         
         return "repository-details"; // The view to render the repository details
     }    

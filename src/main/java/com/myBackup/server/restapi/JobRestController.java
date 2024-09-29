@@ -1,7 +1,7 @@
 package com.myBackup.server.restapi;
 
 import com.myBackup.models.BackupJob;
-import com.myBackup.server.job.JobService;
+import com.myBackup.services.JobService;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

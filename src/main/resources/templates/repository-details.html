@@ -105,41 +105,107 @@
 			    background-color: #ccc; /* Change to grey on hover */
 			    color: #333; /* Keep text dark on hover */
 			}
+			
+			/* Style for Modal */
 			.modal {
-			    display: none; /* Hidden by default */
-			    position: fixed; /* Stay in place */
-			    z-index: 1000; /* Sit on top */
+			    display: none;
+			    position: fixed;
+			    z-index: 1;
 			    left: 0;
 			    top: 0;
-			    width: 100%; /* Full width */
-			    height: 100%; /* Full height */
-			    overflow: auto; /* Enable scroll if needed */
-			    background-color: rgba(0, 0, 0, 0.4); /* Black w/ opacity */
+			    width: 100%;
+			    height: 100%;
+			    overflow: auto;
+			    background-color: rgba(0, 0, 0, 0.4); /* Background color with transparency */
 			}
 			
 			.modal-content {
 			    background-color: #fefefe;
-			    margin: 15% auto; /* 15% from the top and centered */
+			    margin: 5% auto;
 			    padding: 20px;
 			    border: 1px solid #888;
-			    width: 80%; /* Could be more or less, depending on screen size */
+			    width: 40%; /* Adjusted width for a smaller, centered form */
+			    position: relative;
 			    border-radius: 10px;
+			    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+			    text-align: center; /* Center alignment for all content */
 			}
 			
+			/* Style for Close Button - moved to top-right */
 			.close {
+			    position: absolute;
+			    top: 10px;
+			    right: 20px;
 			    color: #aaa;
-			    float: right;
 			    font-size: 28px;
 			    font-weight: bold;
+			    cursor: pointer;
 			}
 			
 			.close:hover,
 			.close:focus {
-			    color: black;
+			    color: #000;
 			    text-decoration: none;
 			    cursor: pointer;
 			}
 			
+			/* Form Group to provide spacing */
+			.form-group {
+			    margin-bottom: 15px;
+			}
+			
+			.form-group label {
+			    display: block;
+			    font-weight: bold;
+			    margin-bottom: 5px;
+			}
+			
+			.form-group input,
+			.form-group select {
+			    width: 80%; /* Shorter but consistent width */
+			    padding: 10px;
+			    box-sizing: border-box;
+			    border-radius: 5px;
+			    border: 1px solid #ccc;
+			    font-size: 16px;
+			    margin: 0 auto; /* Ensure it's centered */
+			}
+			
+			/* Style for the submit button */
+			.submit-btn {
+			    background-color: #4CAF50; /* Green background */
+			    color: white;
+			    padding: 10px 20px;
+			    border: none;
+			    border-radius: 5px;
+			    cursor: pointer;
+			    font-size: 16px;
+			    transition: background-color 0.3s ease;
+			}
+			
+			.submit-btn:hover {
+			    background-color: #45a049; /* Darker green on hover */
+			}
+			
+			/* Center the form elements */
+			form {
+			    display: flex;
+			    flex-direction: column;
+			    align-items: center;
+			}
+			
+			/* Adjust title alignment */
+			.modal-title {
+			    text-align: center;
+			    margin-bottom: 20px;
+			}
+			
+			/* Shorter input field widths */
+			input[type="text"], select {
+			    width: 90%;
+			    padding: 10px;
+			}
+
 			label {
 			    display: block;
 			    margin-top: 10px;
@@ -215,18 +281,18 @@
 			</div>
 	
 		    <!-- Backup Jobs Panel -->
-		    <div class="panel" style="margin-top: 20px;">
+		    <div id="jobs-panel" class="panel" style="margin-top: 20px;">
 		        <div class="panel-header" style="display: flex; justify-content: space-between; align-items: center;">
 		            <h2>Backup Jobs</h2>
 		            <span class="add-button" title="Add Backup Job" id="openModal">+</span> <!-- Use span instead of button -->
 		        </div>
 		        <div class="job-list">
-		            <div class="job-card" th:each="job : ${repository.jobs}">
+		            <div class="job-card" th:each="job : ${jobs}">
 		                <div class="job-info">
 		                    <p><strong>Source Directory:</strong> <span th:text="${job.sourceDirectory}"></span></p>
 		                    <p><strong>Repository ID:</strong> <span th:text="${job.repositoryID}"></span></p>
 		                    <p><strong>Cron Expression:</strong> <span th:text="${job.cronExpression}"></span></p>
-		                    <p><strong>Job Type:</strong> <span th:text="${job.jobType}"></span></p>
+		                    <p><strong>Job Type:</strong> <span th:text="${job.Type}"></span></p>
 		                </div>
 		                <button class="delete-button" title="Delete Job">
 		                    <img src="icon-delete.webp" alt="Delete" class="delete-icon">
@@ -235,30 +301,39 @@
 		        </div>
 		    </div>
 		    
-		    <!-- Modal for Adding Backup Job -->
-		    <div id="jobModal" class="modal">
-		        <div class="modal-content">
-		            <span class="close" id="closeModal">&times;</span>
-		            <h2>Add Backup Job</h2>
-		            <form id="jobForm">
-				        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-		                <label for="sourceDirectory">Source Directory:</label>
-		                <input type="text" id="sourceDirectory" name="sourceDirectory" required>
-		                <br>
-		                <label for="cronExpression">Cron Expression:</label>
-		                <input type="text" id="cronExpression" name="cronExpression" required>
-		                <br>
-		                <label for="jobType">Job Type:</label>
-						<select id="jobType" name="jobType" required>
-						    <option value="">Select Job Type</option>
-						    <!-- Loop through jobTypes to create options -->
-						    <option th:each="type : ${jobTypes}" th:value="${type.name()}" th:text="${type.name()}"></option>
-						</select>
-		                <br>
-		                <button type="submit">Add Job</button>
-		            </form>
-		        </div>
-		    </div>
+			<!-- Modal for Adding Backup Job -->
+			<div id="jobModal" class="modal">
+			    <div class="modal-content">
+			        <span class="close" id="closeModal">&times;</span>
+			        <h2 class="modal-title">Add Backup Job</h2>
+			        <form id="jobForm">
+			            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+			            
+			            <div class="form-group">
+			                <label for="sourceDirectory">Source Directory:</label>
+			                <input type="text" id="sourceDirectory" name="sourceDirectory" required>
+			            </div>
+			
+			            <div class="form-group">
+			                <label for="cronExpression">Cron Expression:</label>
+			                <input type="text" id="cronExpression" name="cronExpression" required>
+			            </div>
+			
+			            <div class="form-group">
+			                <label for="jobType">Job Type:</label>
+			                <select id="jobType" name="jobType" required>
+			                    <option value="">Select Job Type</option>
+			                    <!-- Loop through jobTypes to create options -->
+			                    <option th:each="type : ${jobTypes}" th:value="${type.name()}" th:text="${type.name()}"></option>
+			                </select>
+			            </div>
+			
+			            <div class="form-group">
+			                <button type="submit" class="submit-btn">Add Job</button>
+			            </div>
+			        </form>
+			    </div>
+			</div>
 	        <div class="response" id="jobCreationResponse"></div>
 	    </div>
 	
@@ -303,9 +378,7 @@
 		                <p><strong>Creator:</strong> ${job.creator}</p>
 		                <p><strong>Creation Time:</strong> ${job.creationTime}</p>
 		            </div>
-		            <button class="delete-button" title="Delete Job">
-		                <img src="icon-delete.webp" alt="Delete" class="delete-icon">
-		            </button>
+		            <span class="delete-button" title="Delete Job">&#10006;</span> <!-- Using heavy multiplication sign -->
 		        `;
 		
 		        // Append the new job card to the job list
@@ -318,39 +391,34 @@
 		        };
 		    }
 		
-		 	// Handle form submission
-			document.getElementById("jobForm").onsubmit = function (event) {
-			    event.preventDefault();
-			
-			    var clientID = /*[[${clientID}]]*/ 'defaultClientID';
-			    var sourceDirectory = document.getElementById("sourceDirectory").value;
-			    var repositoryID = /*[[${repository.repoID}]]*/ 'defaultRepoID'; // Fallback value for JS
-			    var creator = /*[[${user.username}]]*/ 'defaultCreator'; // Adjust according to how the user object is structured
-			    var creationTime = new Date().toISOString();
-			    var cronExpression = document.getElementById("cronExpression").value;
-			    var jobType = document.getElementById("jobType").value;
-			    // Get the CSRF token
-			    const csrfToken = document.querySelector('input[name="_csrf"]').value;
-			    
-		        const jobData = {
-		                jobID: "",
-		                clientIDs: [clientID],
-		                sourceDirectory: sourceDirectory,
-		                repositoryID: repositoryID,
-		                creator: creator,
-		                creationTime: "",
-		                cronExpression: cronExpression,
-		                type: jobType
-		            };
+		    document.getElementById("jobForm").onsubmit = function (event) {
+		        event.preventDefault();
 
-		            console.log("jobData=", jobData);
-			
-			    // Retrieve a new UUID from the REST API
+		        // Collect necessary data from the form
+		        var clientID = /*[[${clientID}]]*/ 'defaultClientID';
+		        var sourceDirectory = document.getElementById("sourceDirectory").value;
+		        var repositoryID = /*[[${repository.repoID}]]*/ 'defaultRepoID';
+		        var creator = /*[[${user.username}]]*/ 'defaultCreator';
+		        var cronExpression = document.getElementById("cronExpression").value;
+		        var jobType = document.getElementById("jobType").value;
+		        const csrfToken = document.querySelector('input[name="_csrf"]').value;
+
+		        const jobData = {
+		            jobID: "",
+		            clientIDs: [clientID],
+		            sourceDirectory: sourceDirectory,
+		            repositoryID: repositoryID,
+		            creator: creator,
+		            cronExpression: cronExpression,
+		            type: jobType
+		        };
+
+		        // Send the job data to the backend API
 		        fetch('/api/job/', {
 		            method: 'POST',
 		            headers: {
 		                'Content-Type': 'application/json',
-		                'X-CSRF-TOKEN': csrfToken  // Add the CSRF token to the header
+		                'X-CSRF-TOKEN': csrfToken
 		            },
 		            body: JSON.stringify(jobData)
 		        })
@@ -361,13 +429,45 @@
 		            return response.json();
 		        })
 		        .then(data => {
-		            document.getElementById("jobCreationResponse").innerHTML = `<strong>Job Created Successfully:</strong> ${JSON.stringify(data)}`;
+		            // Close the modal
+		            document.getElementById("jobModal").style.display = "none";
+
+		            // Add the new job to the job list
+		            addJobToList(data);
+		            
+		            // Optionally clear the form fields
+		            document.getElementById("jobForm").reset();
 		        })
 		        .catch(error => {
 		            document.getElementById("jobCreationResponse").innerHTML = `<strong>Error:</strong> ${error.message}`;
 		        });
-			};
-	
+		    };
+		    
+		    function addJobToList(job) {
+		        // Get the job list container
+		        const jobListContainer = document.querySelector('.job-list');
+
+		        // Create a new div for the job row
+		        const jobCard = document.createElement('div');
+		        jobCard.classList.add('job-card');
+
+		        // Fill the div with job information
+		        jobCard.innerHTML = `
+		            <div class="job-info">
+		                <p><strong>Source Directory:</strong> ${job.sourceDirectory}</p>
+		                <p><strong>Repository ID:</strong> ${job.repositoryID}</p>
+		                <p><strong>Cron Expression:</strong> ${job.cronExpression}</p>
+		                <p><strong>Job Type:</strong> ${job.type}</p>
+		            </div>
+		            <button class="delete-button" title="Delete Job">
+		                <img src="icon-delete.webp" alt="Delete" class="delete-icon">
+		            </button>
+		        `;
+
+		        // Append the new job card to the job list container
+		        jobListContainer.appendChild(jobCard);
+		        jobCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+		    }
 	
 		</script>
 	</body>
