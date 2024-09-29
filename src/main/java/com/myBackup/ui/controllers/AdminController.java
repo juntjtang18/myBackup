@@ -77,5 +77,10 @@ public class AdminController {
     public String apiTest_POST_API_JOB() {
     	return "admin/apitest/job/apitest-addjob";
     }
+    
+    @GetMapping("/admin/apitest/general-test")
+    public String apiGeneralTest() {
+    	return "admin/apitest/general-test";
+    }
 
 }

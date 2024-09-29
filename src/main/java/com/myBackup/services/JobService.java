@@ -4,8 +4,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.myBackup.models.BackupJob;
 
-import jakarta.annotation.PostConstruct;
-
 import com.myBackup.config.Config; // Assuming Config is in this package
 import org.springframework.stereotype.Service;
 
@@ -97,6 +95,7 @@ public class JobService {
 
     public Optional<BackupJob> getJobById(String jobId) {
         return Optional.ofNullable(jobMap.get(jobId)); // Get job by ID
+    	//return jobMap.get(jobId);
     }
 
     public List<BackupJob> getJobsByCreator(String creatorName) {

@@ -127,17 +127,41 @@
 
         fetch(apiEndpoint, options)
         .then(response => {
+            // Log response to see what is being returned
+            console.log("Response status:", response.status);
+            console.log("Content-Type:", response.headers.get("content-type"));
+
+            // If the response is not OK (status 200-299)
             if (!response.ok) {
-                throw new Error('Network response was not ok ' + response.statusText);
+                const contentType = response.headers.get("content-type");
+
+                // Check if the response is JSON
+                if (contentType && contentType.includes("application/json")) {
+                    // Parse the error response as JSON
+                    return response.json().then(errorData => {
+                        console.log("Error data (JSON):", errorData);  // Log error data
+                        throw new Error(`${errorData.error || 'Unknown error'}`);
+                    });
+                } else {
+                    // If it's not JSON, try to parse it as text
+                    return response.text().then(errorText => {
+                        console.log("Error data (Text):", errorText);  // Log error text
+                        throw new Error(`${errorText || 'Unknown error'}`);
+                    });
+                }
             }
-            return response.json();
+            return response.json();  // Handle successful response
         })
         .then(data => {
+            // Handle success response
             document.getElementById("otherApiResponse").innerHTML = `<strong>Response:</strong> ${JSON.stringify(data)}`;
         })
         .catch(error => {
+            // Log and display the error
+            console.log("Caught error:", error);
             document.getElementById("otherApiResponse").innerHTML = `<strong>Error:</strong> ${error.message}`;
         });
+
     };
 </script>
 
