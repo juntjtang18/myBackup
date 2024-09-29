@@ -1,7 +1,6 @@
 package com.myBackup.server.repository;
 
 import jakarta.annotation.PreDestroy;
-
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -36,7 +35,23 @@ public class BackupRepositoryService {
         loadRepositories(); // Load repositories at the start
     }
 
- // Save repositories cache to the JSON file
+    // Method to get a repository by its ID
+    public BackupRepository getRepositoryById(String repoId) {
+        lock.lock();
+        try {
+            BackupRepository repository = repositoryCache.get(repoId); // Retrieve from cache
+            if (repository == null) {
+                logger.warn("Repository not found for ID: {}", repoId);
+            } else {
+                logger.info("Retrieved repository: {}", repository);
+            }
+            return repository; // Return the repository or null if not found
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    // Save repositories cache to the JSON file
     private void saveRepositories() {
         lock.lock();
         try {
@@ -149,8 +164,9 @@ public class BackupRepositoryService {
         logger.info("Cleaning up BackupRepositoriesService, saving repositories...");
         saveRepositories(); // Persist the repositories before the service is destroyed
     }
-
+    
     public ObjectMapper getObjectMapper() {
         return objectMapper;
     }
+
 }

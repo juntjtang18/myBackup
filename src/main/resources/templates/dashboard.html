@@ -14,147 +14,104 @@
     <!-- Custom CSS -->
     <style>
         body {
-            background-color: #f5f5f7; /* Light gray background */
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; /* Apple-like font stack */
-            color: #333; /* Dark text for better readability */
+            background-color: #f5f5f7;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            color: #333;
         }
 
         .navbar {
-            background-color: #fff; /* White navbar */
-            border-bottom: 1px solid #ddd; /* Subtle border */
+            background-color: #fff;
+            border-bottom: 1px solid #ddd;
         }
 
         .navbar-brand {
             font-weight: bold;
-            color: #0071e3; /* Blue color for brand */
-        }
-
-        .navbar-nav .nav-link {
-            color: #333; /* Dark text for nav links */
-        }
-
-        .navbar-nav .nav-link:hover {
-            color: #0071e3; /* Blue on hover */
+            color: #0071e3;
         }
 
         .panel {
-            border: none; /* No border for a cleaner look */
-            background-color: #fff; /* White background for panels */
+            border: none;
+            background-color: #fff;
             padding: 20px;
             margin-top: 20px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
-            border-radius: 12px; /* Rounded corners */
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
         }
 
-        .panel-title {
-            margin-bottom: 10px;
+        .repository-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: flex-start;
         }
 
-		.repository-container {
-		    display: flex;
-		    flex-wrap: wrap; /* Allows cards to wrap to the next row */
-		    gap: 10px; /* Reduced space between cards */
-		    justify-content: flex-start; /* Align cards to the left */
-		}
-		
 		.repository-card {
-		    flex: 1 1 160px; /* Allow each card to grow and shrink, set the base width to 200px */
-		    max-width: 180px; /* Set a max width to prevent cards from growing too large */
+		    flex: 1 1 160px;
+		    max-width: 180px;
 		    border: 1px solid #ccc;
 		    border-radius: 5px;
 		    padding: 10px;
-		    margin: 10px; /* Space between cards */
+		    margin: 10px;
 		    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
-		    font-size: 14px; /* Smaller font size for the card text */
-		}
-
-        .repository-card:hover {
-            transform: translateY(-2px); /* Lift effect on hover */
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* Enhanced shadow on hover */
-        }
-
-        .btn-add, .btn-new-job {
-            background-color: #0071e3; /* Apple blue for buttons */
-            color: white;
-            border: none;
-            border-radius: 8px; /* Rounded corners */
-            padding: 10px 16px;
-            font-size: 1rem;
-            transition: background-color 0.2s;
-        }
-        
-		html {
-		    font-size: 14px; /* Decreased font size by 2px globally */
-		}
-		
-		body {
-		    font-size: 1rem; /* Default size set to the new base */
-		}
-		
-        .btn-add:hover, .btn-new-job:hover {
-            background-color: #005bb5; /* Darker blue on hover */
-        }
-
-        .progress {
-            height: 20px;
-            border-radius: 10px; /* Rounded corners */
-        }
-
-        .progress-bar {
-            background-color: #0071e3; /* Blue progress bar */
-            border-radius: 10px; /* Rounded corners */
-        }
-
-        .table th {
-            background-color: #0071e3; /* Blue for table headers */
-            color: white;
-        }
-
-        .table td {
-            padding: 15px;
-        }
-
-        .table-hover tbody tr:hover {
-            background-color: #f1f1f1; /* Light gray on row hover */
-        }
-        #repository-container {
-            display: flex;
-            flex-wrap: wrap; /* Allows cards to wrap to the next row */
-            justify-content: flex-start; /* Align cards to the left */
-        }
-        
-        .btn-add {
-            margin-top: 10px; /* Space above the button */
-        }
-
-		/* Specific styling for the add-repo-card */
-		.add-repo-card {
-		    display: flex;
-		    flex-direction: column;
-		    align-items: center;
-		    justify-content: center;
+		    font-size: 14px;
 		    cursor: pointer;
-		    background-color: #f0f0f0; /* Adjust the background as needed */
-		    border: 2px dashed #ccc; /* Dashed border to resemble an "add" card */
-		    transition: background-color 0.3s ease;
+		    transition: transform 0.3s ease, opacity 0.3s ease;
+		    position: relative; /* Add this for button positioning */
 		}
 		
-		.add-repo-card:hover {
-		    background-color: #e0e0e0; /* Darken slightly on hover */
+		.repository-card.active {
+		    flex: 1 1 100%; /* Make active card take full width */
+		    max-width: none; /* Remove max-width restriction */
+		    opacity: 1; /* Fully visible */
+		    z-index: 1; /* Bring it to front */
+		    transition: transform 0.5s ease; /* Smooth transition */
 		}
 		
-		.add-repo-card .plus-sign {
-		    font-size: 3rem; /* Adjust the size of the "+" */
-		    color: #777;
-		    margin-bottom: 10px;
+		.repository-card:hover {
+		    transform: translateY(-2px);
+		    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
 		}
 		
-		.add-repo-card h5 {
-		    font-size: 1.2rem;
-		    margin: 0;
-		    color: #555;
+		.btn-close {
+		    position: absolute; /* Position the button absolutely */
+		    top: 10px; /* Distance from the top */
+		    right: 10px; /* Distance from the right */
+		    cursor: pointer;
+		    font-size: 20px;
+		    display: none; /* Hidden by default */
+		}
+		
+		.repository-card.active .btn-close {
+		    display: block; /* Show close button only for active card */
 		}
 
+
+        .add-repo-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            background-color: #f0f0f0;
+            border: 2px dashed #ccc;
+            transition: background-color 0.3s ease;
+        }
+
+        .add-repo-card:hover {
+            background-color: #e0e0e0;
+        }
+
+        .add-repo-card .plus-sign {
+            font-size: 3rem;
+            color: #777;
+            margin-bottom: 10px;
+        }
+
+        .add-repo-card h5 {
+            font-size: 1.2rem;
+            margin: 0;
+            color: #555;
+        }
     </style>
 </head>
 <body>
@@ -163,9 +120,6 @@
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
         <div class="container-fluid">
             <a class="navbar-brand" href="#">MyBackup</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item">
@@ -191,23 +145,22 @@
 
     <!-- Main Content -->
     <div class="container mt-4">
-        <!-- Ongoing Backup Tasks Panel -->
+        <!-- Tasks Panel -->
         <div class="panel" id="tasks-panel">
             <div class="panel-title">
-                <h4>Backup Task Ongoing</h4>
+                <h4>Tasks</h4>
             </div>
-            <div id="progress-container">
-                <!-- Progress bars will be dynamically added here -->
-            </div>
+            <!-- Add your task content here -->
+            <p>Your tasks will be displayed here.</p>
         </div>
-        
-        <!-- Backup Repository List Section -->
+
+        <!-- Repository List Panel -->
         <div class="panel" id="repository-list-panel">
             <div class="panel-title">
                 <h4>Backup Repositories</h4>
             </div>
             <div class="repository-container" id="repository-container">
-                <!-- Repository rectangles will be dynamically added here -->
+                <!-- Repository cards will be dynamically added here -->
             </div>
         </div>
     </div>
@@ -222,32 +175,9 @@
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
     <!-- DataTables JS -->
     <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
-    
-    <span id="client-id" data-client-id="${clientID}" style="display:none;"></span>
-    
-    <!-- JavaScript -->
+
     <script th:inline="javascript">
         document.addEventListener("DOMContentLoaded", function() {
-            // Initialize job table (if necessary for other tables)
-            $('#jobTable').DataTable({
-                "paging": true,
-                "pageLength": 10,
-                "searching": true,
-                "ordering": true
-            });
-            
-            // WebSocket setup for backup progress updates
-            const socket = new SockJS('/backup-progress-websocket');
-            const stompClient = Stomp.over(socket);
-
-            stompClient.connect({}, function(frame) {
-                stompClient.subscribe('/topic/backupProgress', function(message) {
-                    const event = JSON.parse(message.body);
-                    updateBackupTasks(event);
-                });
-            });
-
-            // Fetch and display the repositories using POST request
             fetchRepositories();
         });
 
@@ -255,12 +185,10 @@
             const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
             const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
             var clientID = /*[[${clientID}]]*/ 'defaultClientID';
-            console.log("Client ID: " + clientID);
 
             const clientIDRequest = {
                 clientID: clientID
             };
-            console.log(JSON.stringify(clientIDRequest));
 
             fetch('/api/repositories/list-by-clientID', {
                 method: 'POST',
@@ -277,7 +205,6 @@
                 return response.json();
             })
             .then(data => {
-                console.log(data);
                 displayRepositories(data);
             })
             .catch(error => {
@@ -292,18 +219,31 @@
             repositories.forEach(repo => {
                 const repoCard = document.createElement("div");
                 repoCard.classList.add("repository-card");
+
+                // Create the repository card's inner HTML
                 repoCard.innerHTML = `
-                    <h5>${repo.serverName}</h5>
-                    <p>URL: ${repo.serverUrl}</p>
-                    <p>Destination: ${repo.destDirectory}</p>
+                    <div class="card-header">
+                        <h5>${repo.serverName}</h5>
+                        <button type="button" class="btn-close" aria-label="Close" onclick="closeRepoCard(event)"></button>
+                    </div>
+                    <div class="card-body">
+                        <p>URL: ${repo.serverUrl}</p>
+                        <p>Destination: ${repo.destDirectory}</p>
+                    </div>
                 `;
+
+    			console.log("repo:", repo);  // Corrected logging statement
+                
+                // Bind the onclick event to the repoCard
+                repoCard.onclick = () => {
+                    window.location.href = `/repository?id=${repo.repoID}`; // Navigate to the details page with the repoID
+                };
+
+                // Append the card to the container
                 container.appendChild(repoCard);
             });
-            
-         // Create a form element
-            const form = document.createElement("form");
-            form.method = "GET";  // Set form method to GET
-            form.action = "/repository-create";  // Set the form action to your desired endpoint
+
+
 
             // Create the "Add Repository" card
             const addRepoCard = document.createElement("div");
@@ -312,36 +252,44 @@
                 <span class="plus-sign">+</span>
                 <h5>Add New Repository</h5>
             `;
-
-            // Add a click event to the card that submits the form
-            addRepoCard.onclick = function() {
-                form.submit();  // Submit the form when the card is clicked
-            };
-
-            // Append the card to the form
-            form.appendChild(addRepoCard);
-
-            // Append the form to the container
-            container.appendChild(form);
-        }
-     
-        // Function to add a repository (to be implemented)
-        function addRepository() {
-            console.log("Add repository button clicked");
-            // Implement repository addition logic here
+            addRepoCard.onclick = () => window.location.href = "/repository-create";
+            container.appendChild(addRepoCard);
         }
 
-        // Function to update backup tasks
-        function updateBackupTasks(event) {
-            const progressContainer = document.getElementById("progress-container");
-            const progressBar = document.createElement("div");
-            progressBar.classList.add("progress");
-            progressBar.innerHTML = `
-                <div class="progress-bar" role="progressbar" style="width: ${event.progress}%" aria-valuenow="${event.progress}" aria-valuemin="0" aria-valuemax="100">
-                    ${event.taskName} - ${event.progress}%
-                </div>
-            `;
-            progressContainer.appendChild(progressBar);
+        function expandCard(card) {
+            const cards = document.querySelectorAll('.repository-card');
+            cards.forEach(c => {
+                if (c !== card) {
+                    c.style.display = 'none'; // Hide other cards
+                }
+            });
+            card.classList.add('active'); // Make the clicked card active
+            const closeButton = card.querySelector('.btn-close');
+            closeButton.style.display = 'block'; // Show the close button
+        }
+
+        function closeRepoCard(event) {
+            console.log("closeRepoCard clicked");
+
+            // Stop the click event from bubbling up to the repository card click handler
+            event.stopPropagation();
+
+            const activeCard = event.target.closest('.repository-card');
+            
+            if (activeCard) {
+                // Remove the 'active' class to collapse the card
+                activeCard.classList.remove('active');
+
+                // Hide the close button for the collapsed card
+                const closeButton = activeCard.querySelector('.btn-close');
+                closeButton.style.display = 'none'; // Hide the close button
+
+                // Show all cards again (this might not be necessary if they are already displayed)
+                const cards = document.querySelectorAll('.repository-card');
+                cards.forEach(c => {
+                    c.style.display = 'block'; // Ensure all cards are displayed
+                });
+            }
         }
     </script>
 </body>

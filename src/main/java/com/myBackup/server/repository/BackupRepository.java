@@ -6,6 +6,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
+
 import com.myBackup.models.BackupJob;
 
 // Custom exception for directory issues
@@ -89,5 +91,12 @@ public class BackupRepository {
 	
 	public void setServerName(String serverName) {
 		this.serverName = serverName;
+	}
+	
+	public Map<String, BackupJob> getJobsByCreator(String creator) {
+	    // Filtering jobs based on creator
+	    return jobs.values().stream()
+	            .filter(job -> job.getCreator().equals(creator)) // Assuming BackupJob has getCreator() method
+	            .collect(Collectors.toMap(BackupJob::getJobID, job -> job)); // Collecting into a map
 	}
 }

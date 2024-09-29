@@ -82,4 +82,14 @@ public class HomeController {
             return "redirect:/dashboard";  // Redirect to the dashboard endpoint
         }
     }
+    
+    @GetMapping("/testapi")
+    public String testapi() {
+    	return "testapi";
+    }
+    
+    @GetMapping("/adminhome")
+    public String adminHome() {
+    	return "admin/adminhome.html";
+    }
 }

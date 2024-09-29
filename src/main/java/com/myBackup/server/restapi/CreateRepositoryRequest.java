@@ -1,4 +1,4 @@
-	package com.myBackup.models;
+	package com.myBackup.server.restapi;
 
 public class CreateRepositoryRequest {
 	private String serverUrl;

@@ -114,4 +114,17 @@ public class BackupJob {
 	public void setRepositoryID(String repositoryID) {
 		this.repositoryID = repositoryID;
 	}
+	@Override
+	public String toString() {
+	    return "BackupJob{" +
+	            "jobID='" + jobID + '\'' +
+	            ", clientIDs=" + clientIDs +
+	            ", sourceDirectory='" + sourceDirectory + '\'' +
+	            ", repositoryID='" + repositoryID + '\'' +
+	            ", creator='" + creator + '\'' +
+	            ", creationTime=" + creationTime +
+	            ", cronExpression='" + cronExpression + '\'' +
+	            ", type='" + type + '\'' +
+	            '}';
+	}
 }

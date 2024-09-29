@@ -1,4 +1,4 @@
-package com.myBackup.models;
+package com.myBackup.server.restapi;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;

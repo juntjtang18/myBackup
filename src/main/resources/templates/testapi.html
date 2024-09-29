@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Creation API Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        label {
+            display: block;
+            margin: 10px 0 5px;
+        }
+        input, select {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 15px;
+        }
+        button {
+            padding: 10px 15px;
+        }
+        #response {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Create a Job</h1>
+<form id="jobForm" th:action="@{/api/job/}" method="post">
+    <label for="jobID">Job ID:</label>
+    <input type="text" id="jobID" name="jobID" required>
+    
+    <label for="clientIDs">Client IDs (comma separated):</label>
+    <input type="text" id="clientIDs" name="clientIDs" required>
+    
+    <label for="sourceDirectory">Source Directory:</label>
+    <input type="text" id="sourceDirectory" name="sourceDirectory" required>
+    
+    <label for="repositoryID">Repository ID:</label>
+    <input type="text" id="repositoryID" name="repositoryID" required>
+    
+    <label for="creator">Creator:</label>
+    <input type="text" id="creator" name="creator" required>
+    
+    <label for="creationTime">Creation Time:</label>
+    <input type="datetime-local" id="creationTime" name="creationTime" required>
+    
+    <label for="cronExpression">Cron Expression:</label>
+    <input type="text" id="cronExpression" name="cronExpression" required>
+    
+    <label for="type">Job Type:</label>
+    <select id="type" name="type" required>
+        <option value="">Select Job Type</option>
+        <option value="MUST_DO">MUST_DO</option>
+        <option value="REGULAR">REGULAR</option>
+    </select>
+
+    <!-- CSRF Token -->
+    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+
+    <button type="submit">Create Job</button>
+</form>
+
+<div id="response"></div>
+
+<script>
+    document.getElementById("jobForm").onsubmit = function (event) {
+        event.preventDefault();
+
+        const jobID = document.getElementById("jobID").value;
+        const clientIDs = document.getElementById("clientIDs").value.split(',').map(id => id.trim());
+        const sourceDirectory = document.getElementById("sourceDirectory").value;
+        const repositoryID = document.getElementById("repositoryID").value;
+        const creator = document.getElementById("creator").value;
+        const creationTime = new Date(document.getElementById("creationTime").value).toISOString();
+        const cronExpression = document.getElementById("cronExpression").value;
+        const type = document.getElementById("type").value;
+        const csrfToken = document.querySelector('input[name="_csrf"]').value; // Get the CSRF token
+
+        const jobData = {
+            jobID: jobID,
+            clientIDs: clientIDs,
+            sourceDirectory: sourceDirectory,
+            repositoryID: repositoryID,
+            creator: creator,
+            creationTime: creationTime,
+            cronExpression: cronExpression,
+            type: type
+        };
+
+        fetch('/api/job/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken  // Add the CSRF token to the header
+            },
+            body: JSON.stringify(jobData)
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok ' + response.statusText);
+            }
+            return response.json();
+        })
+        .then(data => {
+            document.getElementById("response").innerHTML = `<strong>Job Created Successfully:</strong> ${JSON.stringify(data)}`;
+        })
+        .catch(error => {
+            document.getElementById("response").innerHTML = `<strong>Error:</strong> ${error.message}`;
+        });
+    };
+</script>
+
+</body>
+</html>

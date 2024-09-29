@@ -1,19 +1,22 @@
 package com.myBackup.ui.controllers;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import com.myBackup.client.services.UUIDService;
+import com.myBackup.models.BackupJob;
 import com.myBackup.server.meta.ServersService;
 import com.myBackup.server.meta.ServersService.Server;
+import com.myBackup.server.repository.BackupRepository;
 import com.myBackup.server.repository.BackupRepositoryService;
 
 @Controller
@@ -45,4 +48,31 @@ public class RepositoryController {
         model.addAttribute("clientID", clientID); // Add the client ID to the model
     	return "repository-create"; 
     }
+    
+    @GetMapping("/repository")
+    public String getRepositoryDetails(@RequestParam("id") String repoId, Model model) {
+        logger.info("Fetching details for repository ID: {}", repoId);
+        
+        // Fetch the repository details using the repoId
+        BackupRepository repository = backupRepositoryService.getRepositoryById(repoId); // Implement this method in your service
+        
+        if (repository == null) {
+            logger.error("Repository not found for ID: {}", repoId);
+            model.addAttribute("error", "Repository not found");
+            return "error"; // Return to an error page or handle as needed
+        }
+        
+        model.addAttribute("repository", repository); // Add repository details to the model
+        
+        // Get the current authenticated user
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        model.addAttribute("user", authentication.getPrincipal());
+        // Get the clientID from UUIDService
+        String clientID = uuidService.getUUID();
+        model.addAttribute("clientID", clientID); // Add the clientID to the model
+        List<BackupJob.JobType> jobTypes = Arrays.asList(BackupJob.JobType.values());
+        model.addAttribute("jobTypes", jobTypes);
+        
+        return "repository-details"; // The view to render the repository details
+    }    
 }

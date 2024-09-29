@@ -20,14 +20,15 @@ public class Config {
     private static final Logger logger = LoggerFactory.getLogger(Config.class);
     private static Config instance;
 
-    private String jobsDirectory;
+    //private String jobsDirectory;
     private String usersFilePath;
     private boolean encryptData;
-    private String backupRepositoryFilePath;
+    private String repositoryFilePath;
 	private String metaDirectory;			// the directory storing the meta data files. critical
 	private String serversFilePath;			// the file records the servers, including localhost:8080
 	private int threadPoolSize;
 	private String uuidFilePath;
+	private String jobsFilePath;
 	
     // Private constructor to prevent instantiation
     private Config() {
@@ -82,17 +83,17 @@ public class Config {
             throw e; // Re-throw the exception after logging
         }
 
-        this.metaDirectory = Paths.get(getAppDirectory(),"meta").toString();
-        this.usersFilePath = new File(metaDirectory, "users.pwd").getAbsolutePath();
-        this.backupRepositoryFilePath = Paths.get(metaDirectory, "repositories.json").toString();
-        this.serversFilePath = Paths.get(metaDirectory,"servers.json").toString();
-        this.uuidFilePath = Paths.get(getAppDirectory(), "config", "uuid.id").toString();
-        
+        this.metaDirectory 		= Paths.get(getAppDirectory(),"meta").toString();
+        this.usersFilePath 		= new File(metaDirectory, "users.pwd").getAbsolutePath();
+        this.repositoryFilePath = Paths.get(metaDirectory, "repositories.json").toString();
+        this.jobsFilePath		= Paths.get(metaDirectory, "jobs.json").toString();
+        this.serversFilePath 	= Paths.get(metaDirectory,"servers.json").toString();
+        this.uuidFilePath 		= Paths.get(getAppDirectory(), "config", "uuid.id").toString();
         this.encryptData = Boolean.parseBoolean(Optional.ofNullable(ini.get("settings", "encrypt_data")).orElse("false"));
         this.threadPoolSize = Integer.parseInt(Optional.ofNullable(ini.get("settings", "threadPoolSize")).orElse("5"));
         
         logger.info("File Paths: metaDirector: {} usersFilePath: {}  backupRepositoryFilePath: {}   serversFilePath: {}    uuidFilePath: {}", 
-        		                 metaDirectory, usersFilePath, backupRepositoryFilePath, serversFilePath, uuidFilePath);
+        		                 metaDirectory, usersFilePath, repositoryFilePath, serversFilePath, uuidFilePath);
     }
 
     public String getAppDirectory() {
@@ -134,9 +135,9 @@ public class Config {
         return threadPoolSize;
     }
     
-    public String getJobsDirectory() {
-        return jobsDirectory;
-    }
+    //public String getJobsDirectory() {
+    //    return jobsDirectory;
+    //}
 
     public String getUsersFilePath() {
     	return usersFilePath;
@@ -147,7 +148,7 @@ public class Config {
     }
 
     public String getBackupRepositoryFilePath() {
-        return backupRepositoryFilePath;
+        return repositoryFilePath;
     }
 
 	public String getMetaDirectory() {
@@ -173,5 +174,13 @@ public class Config {
 	public void setUuidFilePath(String uuidFilePath) {
 		this.uuidFilePath = uuidFilePath;
 	}
+
+	public String getJobFilePath() {
+		return jobsFilePath;
+	}
+
+	//public void setJobsFilePath(String jobsFilePath) {
+	//	this.jobsFilePath = jobsFilePath;
+	//}
 
 }

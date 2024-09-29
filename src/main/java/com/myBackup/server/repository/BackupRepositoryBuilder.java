@@ -11,7 +11,7 @@ import java.util.Set;
 public class BackupRepositoryBuilder {
     private final BackupRepositoryService service;
     private BackupRepository repository;
-
+     
     public BackupRepositoryBuilder(BackupRepositoryService service) {
         this.service = service;
         this.repository = service.buildRepository(); // Create a new repository instance
@@ -118,7 +118,7 @@ public class BackupRepositoryBuilder {
     private void persistClientIDs() {
         Path clientIDsFilePath = Paths.get(repository.getDestDirectory(), "clients.json");
         try {
-            service.getObjectMapper().writeValue(clientIDsFilePath.toFile(), repository.getClientIDs());
+        	service.getObjectMapper().writeValue(clientIDsFilePath.toFile(), repository.getClientIDs());
         } catch (IOException e) {
             e.printStackTrace();
             throw new RuntimeException("Failed to persist client IDs to " + clientIDsFilePath, e);

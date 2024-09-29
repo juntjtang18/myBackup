@@ -6,10 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.myBackup.models.ClientIDRequest;
-import com.myBackup.models.CreateRepositoryRequest;
 import com.myBackup.server.repository.BackupRepositoryService;
-import com.myBackup.ui.controllers.HomeController;
 import com.myBackup.server.repository.BackupRepository;
 import com.myBackup.server.repository.BackupRepositoryBuilder;
 
@@ -18,12 +15,12 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/repositories")
-public class BackupRepositoriesController {
-    private static final Logger logger = LoggerFactory.getLogger(BackupRepositoriesController.class);
+public class RepositoriesRestController {
+    private static final Logger logger = LoggerFactory.getLogger(RepositoriesRestController.class);
 
     private final BackupRepositoryService backupReposService;
     
-    public BackupRepositoriesController(BackupRepositoryService backupReposService) {
+    public RepositoriesRestController(BackupRepositoryService backupReposService) {
         this.backupReposService = backupReposService;
     }
     
