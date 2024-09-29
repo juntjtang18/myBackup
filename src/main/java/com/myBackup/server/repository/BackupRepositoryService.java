@@ -32,7 +32,10 @@ public class BackupRepositoryService {
         this.objectMapper = objectMapper;
         this.config = config;
         this.REPOSITORY_FILE_PATH = this.config.getBackupRepositoryFilePath();
+        logger.info("Repository file path set to: {}", REPOSITORY_FILE_PATH);
+        
         loadRepositories(); // Load repositories at the start
+        logger.info("Repositories loaded from file: {}", REPOSITORY_FILE_PATH);
     }
 
     // Method to get a repository by its ID
@@ -51,7 +54,7 @@ public class BackupRepositoryService {
         }
     }
 
-    // Save repositories cache to the JSON file
+ // Save repositories cache to the JSON file
     private void saveRepositories() {
         lock.lock();
         try {
@@ -69,15 +72,12 @@ public class BackupRepositoryService {
                 }
             }
 
-            // Write each repository in a new line by iterating over each value in the cache
-            try (PrintWriter writer = new PrintWriter(new FileWriter(file))) {
-                for (BackupRepository repository : repositoryCache.values()) {
-                    String repositoryJson = objectMapper.writeValueAsString(repository);
-                    writer.println(repositoryJson);
-                }
+            // Write all repositories as a JSON array
+            try (FileWriter fileWriter = new FileWriter(file)) {
+                objectMapper.writeValue(fileWriter, repositoryCache.values());
             }
 
-            logger.info("Saved {} repositories to file, one record per line.", repositoryCache.size());
+            logger.info("Saved {} repositories to file as an array.", repositoryCache.size());
 
         } catch (IOException e) {
             logger.error("Error saving repositories to file: {}", e.getMessage());
@@ -89,20 +89,27 @@ public class BackupRepositoryService {
     // Load repositories from the file
     private void loadRepositories() {
         lock.lock();
-        logger.info("Load repositories from file {}", REPOSITORY_FILE_PATH);
+        logger.info("Loading repositories from file {}", REPOSITORY_FILE_PATH);
         try {
             File file = new File(REPOSITORY_FILE_PATH);
             if (file.exists()) {
+                // Check if the file is not empty
+                if (file.length() == 0) {
+                    logger.warn("Repository file is empty: {}", REPOSITORY_FILE_PATH);
+                    return; // Exit if the file is empty
+                }
+
+                // Load repositories from the file
                 BackupRepository[] loadedRepositories = objectMapper.readValue(file, BackupRepository[].class);
                 for (BackupRepository repository : loadedRepositories) {
                     repositoryCache.put(repository.getRepoID(), repository);
                 }
-                logger.info("Loaded {} repositories from file.", repositoryCache.size());
+                logger.info("Loaded {} repositories from file.", loadedRepositories.length); // Log number of loaded repositories
             } else {
                 logger.warn("Repository file does not exist: {}", REPOSITORY_FILE_PATH);
             }
         } catch (IOException e) {
-            logger.error("Error loading repositories from file: {}", e.getMessage());
+            logger.error("Error loading repositories from file: {} - {}", REPOSITORY_FILE_PATH, e.getMessage());
         } finally {
             lock.unlock();
         }

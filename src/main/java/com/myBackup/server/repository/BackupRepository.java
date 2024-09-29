@@ -60,11 +60,6 @@ public class BackupRepository {
         return clientIDs;
     }
 
-    // New method: Get the count of client IDs
-    public int getClientCount() {
-        return clientIDs.size();
-    }
-
     // New method: Check if a job exists by jobID
     public boolean hasJob(String jobID) {
         return jobs.containsKey(jobID);

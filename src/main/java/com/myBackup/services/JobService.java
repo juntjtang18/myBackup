@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -39,24 +40,12 @@ public class JobService {
         this.creatorIndex = buildCreatorIndex(jobMap); // Build the index
     }
     
-    @PostConstruct
-    public void init() {
-        createFileIfNotExists(filePath);
-    }
-    
-    private Map<String, BackupJob> loadJobsFromFile() {
-        createFileIfNotExists(filePath); // Ensure the file and directory exist
-        File file = new File(filePath);
-        if (!file.exists()) {
-            return Collections.emptyMap(); // Return an empty map if the file doesn't exist
-        }
-        try {
-            // Load jobs and create a map with jobID as the key
-            List<BackupJob> jobList = objectMapper.readValue(file, new TypeReference<List<BackupJob>>() {});
-            return jobList.stream().collect(Collectors.toMap(BackupJob::getJobID, job -> job));
+    private void saveJobsToFile() {
+        createFileIfNotExists(filePath); // Ensure the file and directory exist before saving
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
+            writer.write(objectMapper.writeValueAsString(new ArrayList<>(jobMap.values()))); // Write all jobs as a single array
         } catch (IOException e) {
             e.printStackTrace(); // Handle the error appropriately (consider logging)
-            return Collections.emptyMap();
         }
     }
 
@@ -78,6 +67,21 @@ public class JobService {
         }
     }
 
+    private Map<String, BackupJob> loadJobsFromFile() {
+        File file = new File(filePath);
+        if (!file.exists()) {
+            return Collections.emptyMap(); // Return an empty map if the file doesn't exist
+        }
+        try {
+            // Load jobs and create a map with jobID as the key
+            List<BackupJob> jobList = objectMapper.readValue(file, new TypeReference<List<BackupJob>>() {});
+            return jobList.stream().collect(Collectors.toMap(BackupJob::getJobID, job -> job));
+        } catch (IOException e) {
+            e.printStackTrace(); // Handle the error appropriately (consider logging)
+            return Collections.emptyMap();
+        }
+    }
+    
     private Map<String, List<String>> buildCreatorIndex(Map<String, BackupJob> jobMap) {
         Map<String, List<String>> index = new ConcurrentHashMap<>();
         for (BackupJob job : jobMap.values()) {
@@ -152,15 +156,4 @@ public class JobService {
               });
     }
 
-    private void saveJobsToFile() {
-        createFileIfNotExists(filePath); // Ensure the file and directory exist before saving
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
-            for (Object job : jobMap.values()) { // Iterate through each job in the map
-                writer.write(objectMapper.writeValueAsString(job)); // Write each job as a JSON string
-                writer.newLine(); // Write a newline after each job
-            }
-        } catch (IOException e) {
-            e.printStackTrace(); // Handle the error appropriately (consider logging)
-        }
-    }
 }
