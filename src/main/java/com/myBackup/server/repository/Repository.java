@@ -8,7 +8,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import com.myBackup.models.BackupJob;
+import com.myBackup.models.Job;
 
 // Custom exception for directory issues
 @SuppressWarnings("serial")
@@ -18,16 +18,16 @@ class DirectoryNotFoundException extends RuntimeException {
     }
 }
 
-public class BackupRepository {
+public class Repository {
     private final String repoID;
     private String destDirectory; // Renamed variable
-    private final Map<String, BackupJob> jobs; // Map of jobs
+    private final Map<String, Job> jobs; // Map of jobs
     private final Set<String> clientIDs;
     private String serverUrl; // New attribute
     private String serverName;
 
     // Constructor
-    public BackupRepository() {
+    public Repository() {
         this.repoID = UUID.randomUUID().toString();
         this.destDirectory = "";
         this.jobs = Collections.synchronizedMap(new HashMap<>()); // Synchronized map for thread safety
@@ -46,7 +46,7 @@ public class BackupRepository {
     }
 
     // Get all jobs (clients) associated with the repository
-    public Map<String, BackupJob> getJobs() {
+    public Map<String, Job> getJobs() {
         return jobs;
     }
 
@@ -88,10 +88,10 @@ public class BackupRepository {
 		this.serverName = serverName;
 	}
 	
-	public Map<String, BackupJob> getJobsByCreator(String creator) {
+	public Map<String, Job> getJobsByCreator(String creator) {
 	    // Filtering jobs based on creator
 	    return jobs.values().stream()
 	            .filter(job -> job.getCreator().equals(creator)) // Assuming BackupJob has getCreator() method
-	            .collect(Collectors.toMap(BackupJob::getJobID, job -> job)); // Collecting into a map
+	            .collect(Collectors.toMap(Job::getJobID, job -> job)); // Collecting into a map
 	}
 }

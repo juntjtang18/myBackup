@@ -19,16 +19,16 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.myBackup.config.Config;
 
 @Service
-public class BackupRepositoryService {
+public class RepositoryService {
 
-    private static final Logger logger = LoggerFactory.getLogger(BackupRepositoryService.class);
+    private static final Logger logger = LoggerFactory.getLogger(RepositoryService.class);
     private final String REPOSITORY_FILE_PATH;
-    private final Map<String, BackupRepository> repositoryCache = new ConcurrentHashMap<>();
+    private final Map<String, Repository> repositoryCache = new ConcurrentHashMap<>();
     private final ReentrantLock lock = new ReentrantLock();
     private final ObjectMapper objectMapper; // Injected ObjectMapper
     private Config config;
     
-    public BackupRepositoryService(ObjectMapper objectMapper, Config config) {
+    public RepositoryService(ObjectMapper objectMapper, Config config) {
         this.objectMapper = objectMapper;
         this.config = config;
         this.REPOSITORY_FILE_PATH = this.config.getBackupRepositoryFilePath();
@@ -39,10 +39,10 @@ public class BackupRepositoryService {
     }
 
     // Method to get a repository by its ID
-    public BackupRepository getRepositoryById(String repoId) {
+    public Repository getRepositoryById(String repoId) {
         lock.lock();
         try {
-            BackupRepository repository = repositoryCache.get(repoId); // Retrieve from cache
+            Repository repository = repositoryCache.get(repoId); // Retrieve from cache
             if (repository == null) {
                 logger.warn("Repository not found for ID: {}", repoId);
             } else {
@@ -100,8 +100,8 @@ public class BackupRepositoryService {
                 }
 
                 // Load repositories from the file
-                BackupRepository[] loadedRepositories = objectMapper.readValue(file, BackupRepository[].class);
-                for (BackupRepository repository : loadedRepositories) {
+                Repository[] loadedRepositories = objectMapper.readValue(file, Repository[].class);
+                for (Repository repository : loadedRepositories) {
                     repositoryCache.put(repository.getRepoID(), repository);
                 }
                 logger.info("Loaded {} repositories from file.", loadedRepositories.length); // Log number of loaded repositories
@@ -116,11 +116,11 @@ public class BackupRepositoryService {
     }
 
     // Method to get all repositories by clientID
-    public List<BackupRepository> getAllByClientID(String clientID) {
+    public List<Repository> getAllByClientID(String clientID) {
         lock.lock();
         try {
-            List<BackupRepository> result = new ArrayList<>();
-            for (BackupRepository repository : repositoryCache.values()) {
+            List<Repository> result = new ArrayList<>();
+            for (Repository repository : repositoryCache.values()) {
                 if (repository.getClientIDs().contains(clientID)) {
                     result.add(repository);
                 }
@@ -132,12 +132,12 @@ public class BackupRepositoryService {
     }
     
     // Method to create a new BackupRepository instance
-    public BackupRepository buildRepository() {
-        return new BackupRepository();
+    public Repository buildRepository() {
+        return new Repository();
     }
 
     // Method to create and add a new BackupRepository to the cache
-    public void createRepository(BackupRepository repository) {
+    public void createRepository(Repository repository) {
         lock.lock();
         try {
             // Check if the repository already exists

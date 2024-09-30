@@ -16,9 +16,9 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import com.myBackup.config.Config;
-import com.myBackup.models.BackupTask;
-import com.myBackup.models.BackupTask.TaskStatus;
-import com.myBackup.server.repository.BackupRepositoryService;
+import com.myBackup.models.Task;
+import com.myBackup.models.Task.TaskStatus;
+import com.myBackup.server.repository.RepositoryService;
 
 @Service
 public class TaskDispatcher {
@@ -27,9 +27,9 @@ public class TaskDispatcher {
     private final TaskQueue taskQueue;
     ExecutorService executorService;
     private ApplicationEventPublisher eventPublisher;
-    private BackupRepositoryService repoService;
+    private RepositoryService repoService;
 
-    public TaskDispatcher(TaskQueue taskQueue, ApplicationEventPublisher eventPublisher, BackupRepositoryService repoService) {
+    public TaskDispatcher(TaskQueue taskQueue, ApplicationEventPublisher eventPublisher, RepositoryService repoService) {
         this.taskQueue = taskQueue;
         this.eventPublisher = eventPublisher;
         this.repoService = repoService;
@@ -52,7 +52,7 @@ public class TaskDispatcher {
         new Thread(() -> {
             while (true) {
                 try {
-                    BackupTask task = taskQueue.take(); // Wait for a task to be available
+                    Task task = taskQueue.take(); // Wait for a task to be available
                     task.setPickedTime(Instant.now());
                     task.setStatus(TaskStatus.IN_PROGRESS);
                     

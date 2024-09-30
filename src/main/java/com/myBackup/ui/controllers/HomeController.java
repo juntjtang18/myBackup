@@ -5,7 +5,7 @@ import com.myBackup.client.services.UUIDService;
 import com.myBackup.models.UserDto;
 import com.myBackup.server.meta.ServersService;
 import com.myBackup.server.meta.ServersService.Server;
-import com.myBackup.server.repository.BackupRepositoryService;
+import com.myBackup.server.repository.RepositoryService;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -22,10 +22,10 @@ public class HomeController {
     private static final Logger logger = LoggerFactory.getLogger(HomeController.class);
 
     private UUIDService uuidService;
-    private final BackupRepositoryService backupRepositoryService;
+    private final RepositoryService backupRepositoryService;
     private ServersService serversService; // Inject the ServersService to access server data
 
-    public HomeController(UUIDService uuidService, BackupRepositoryService backupRepositoryService, ServersService serversService) {
+    public HomeController(UUIDService uuidService, RepositoryService backupRepositoryService, ServersService serversService) {
         this.uuidService = uuidService;
         this.backupRepositoryService = backupRepositoryService;
         this.serversService = serversService;

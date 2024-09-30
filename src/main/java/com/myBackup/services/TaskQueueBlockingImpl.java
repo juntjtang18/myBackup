@@ -1,27 +1,28 @@
 package com.myBackup.services;
 
+import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import org.springframework.stereotype.Service;
 
-import com.myBackup.models.BackupTask;
-import com.myBackup.models.BackupTask.TaskStatus;
+import com.myBackup.models.Task;
+import com.myBackup.models.Task.TaskStatus;
 
 
 @Service
 public class TaskQueueBlockingImpl implements TaskQueue {
-    private final BlockingQueue<BackupTask> queue = new LinkedBlockingQueue<>();
+    private final BlockingQueue<Task> queue = new LinkedBlockingQueue<>();
 
     @Override
-    public void add(BackupTask backupTask) {
+    public void add(Task backupTask) {
     	backupTask.setStatus(TaskStatus.WAITING);
         queue.add(backupTask);
         
     }
 
     @Override
-    public BackupTask take() throws InterruptedException {
+    public Task take() throws InterruptedException {
         return queue.take(); // Blocks if the queue is empty
     }
 
@@ -29,4 +30,9 @@ public class TaskQueueBlockingImpl implements TaskQueue {
     public int size() {
         return queue.size();
     }
+
+	@Override
+	public void addAll(List<Task> tasks) {
+		queue.addAll(tasks);
+	}
 }

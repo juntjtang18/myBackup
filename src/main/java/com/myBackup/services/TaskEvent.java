@@ -5,31 +5,23 @@ import java.util.UUID;
 
 import org.springframework.context.ApplicationEvent;
 
-import com.myBackup.models.BackupTask;
+import com.myBackup.models.Task;
 
 
 @SuppressWarnings("serial")
-public class BackupTaskEvent extends ApplicationEvent {
-    private String eventID;
-    //private BackupEventType eventType;
+public class TaskEvent extends ApplicationEvent {
+    private String 	eventID;
     private Instant eventTime;
-    private BackupTask backupTask;
-    private int progressPercentage;
-    private String message;
-    
-    //public enum BackupEventType {
-    //	IN_PROGRESS,
-    //	COMPLETED,
-    //	FAILED,
-    //	PENDING
-    //}
+    private Task 	backupTask;
+    private int 	progressPercentage;
+    private String 	message;
     
     // Constructor
-    public BackupTaskEvent(Object source, BackupTask backupTask, int progressPercentage) {
+    public TaskEvent(Object source, Task backupTask, int progressPercentage) {
         this(source, backupTask, progressPercentage, "");
     }
 
-	public BackupTaskEvent(Object source, BackupTask backupTask, int progressPercentage, String message2) {
+	public TaskEvent(Object source, Task backupTask, int progressPercentage, String message2) {
 		super(source);
         this.eventID = UUID.randomUUID().toString();
     	//this.eventType = eventType;
@@ -55,11 +47,11 @@ public class BackupTaskEvent extends ApplicationEvent {
 		this.eventTime = eventTime;
 	}
 
-	public BackupTask getBackupTask() {
+	public Task getBackupTask() {
 		return backupTask;
 	}
 
-	public void setBackupTask(BackupTask backupTask) {
+	public void setBackupTask(Task backupTask) {
 		this.backupTask = backupTask;
 	}
 

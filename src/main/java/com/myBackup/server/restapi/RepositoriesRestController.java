@@ -6,9 +6,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.myBackup.server.repository.BackupRepositoryService;
-import com.myBackup.server.repository.BackupRepository;
-import com.myBackup.server.repository.BackupRepositoryBuilder;
+import com.myBackup.server.repository.RepositoryService;
+import com.myBackup.server.repository.Repository;
+import com.myBackup.server.repository.RepositoryBuilder;
 
 import java.io.File; // Import File for directory checking
 import java.util.List;
@@ -18,9 +18,9 @@ import java.util.List;
 public class RepositoriesRestController {
     private static final Logger logger = LoggerFactory.getLogger(RepositoriesRestController.class);
 
-    private final BackupRepositoryService backupReposService;
+    private final RepositoryService backupReposService;
     
-    public RepositoriesRestController(BackupRepositoryService backupReposService) {
+    public RepositoriesRestController(RepositoryService backupReposService) {
         this.backupReposService = backupReposService;
     }
     
@@ -31,10 +31,10 @@ public class RepositoriesRestController {
     }
     
     @PostMapping("/list-by-clientID")
-    public ResponseEntity<List<BackupRepository>> getAllRepositories(@RequestBody ClientIDRequest request) {
+    public ResponseEntity<List<Repository>> getAllRepositories(@RequestBody ClientIDRequest request) {
         logger.debug("/api/repositories/list called with {}.", request.getClientID());
         
-        List<BackupRepository> repositories = backupReposService.getAllByClientID(request.getClientID());
+        List<Repository> repositories = backupReposService.getAllByClientID(request.getClientID());
         return new ResponseEntity<>(repositories, HttpStatus.OK);
     }
     
@@ -50,7 +50,7 @@ public class RepositoriesRestController {
         }
 
         // If it doesn't exist, proceed to create the repository
-        BackupRepository newRepository = new BackupRepositoryBuilder(backupReposService)
+        Repository newRepository = new RepositoryBuilder(backupReposService)
                                             .connectTo(request.getServerUrl(), request.getServerName())
                                             .mountTo(request.getDestDirectory())
                                             .grantTo(request.getClientID())
@@ -66,10 +66,10 @@ public class RepositoriesRestController {
     }
     
     @PostMapping("/create/confirm")
-    public ResponseEntity<BackupRepository> confirmCreateRepository(@RequestBody CreateRepositoryRequest request) {
+    public ResponseEntity<Repository> confirmCreateRepository(@RequestBody CreateRepositoryRequest request) {
         logger.debug("/api/repositories/create/confirm called with destDirectory: {}, clientID: {}.", request.getDestDirectory(), request.getClientID());
 
-        BackupRepository newRepository = new BackupRepositoryBuilder(backupReposService)
+        Repository newRepository = new RepositoryBuilder(backupReposService)
                                             .connectTo(request.getServerUrl(), request.getServerName())
                                             .mountTo(request.getDestDirectory())
                                             .grantTo(request.getClientID())

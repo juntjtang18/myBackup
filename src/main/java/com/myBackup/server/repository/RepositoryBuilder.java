@@ -1,6 +1,6 @@
 package com.myBackup.server.repository;
 
-import com.myBackup.models.BackupJob;
+import com.myBackup.models.Job;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -8,16 +8,16 @@ import java.nio.file.Paths;
 import java.util.Map;
 import java.util.Set;
 
-public class BackupRepositoryBuilder {
-    private final BackupRepositoryService service;
-    private BackupRepository repository;
+public class RepositoryBuilder {
+    private final RepositoryService service;
+    private Repository repository;
      
-    public BackupRepositoryBuilder(BackupRepositoryService service) {
+    public RepositoryBuilder(RepositoryService service) {
         this.service = service;
         this.repository = service.buildRepository(); // Create a new repository instance
     }
 
-    public BackupRepositoryBuilder mountTo(String destination) {
+    public RepositoryBuilder mountTo(String destination) {
         // Validate the destination parameter
         if (destination == null || destination.isEmpty()) {
             throw new IllegalArgumentException("Destination directory must not be empty.");
@@ -45,7 +45,7 @@ public class BackupRepositoryBuilder {
         return this;
     }
 
-    public BackupRepositoryBuilder grantTo(String clientID) {
+    public RepositoryBuilder grantTo(String clientID) {
         // Validate clientID
         if (clientID == null || clientID.isEmpty()) {
             throw new IllegalArgumentException("Client ID must not be empty.");
@@ -61,7 +61,7 @@ public class BackupRepositoryBuilder {
     }
 
     // New method: Connect to server and set serverUrl
-    public BackupRepositoryBuilder connectTo(String serverUrl, String serverName) {
+    public RepositoryBuilder connectTo(String serverUrl, String serverName) {
         // Validate serverUrl
         if (serverUrl == null || serverUrl.isEmpty()) {
             throw new IllegalArgumentException("Server URL must not be empty.");
@@ -73,7 +73,7 @@ public class BackupRepositoryBuilder {
         return this;
     }
     
-    public BackupRepositoryBuilder connectTo(String serverUrl) {
+    public RepositoryBuilder connectTo(String serverUrl) {
         // Validate serverUrl
         if (serverUrl == null || serverUrl.isEmpty()) {
             throw new IllegalArgumentException("Server URL must not be empty.");
@@ -89,9 +89,9 @@ public class BackupRepositoryBuilder {
         Path jobsFilePath = Paths.get(repository.getDestDirectory(), "jobs.json");
         if (Files.exists(jobsFilePath)) {
             try {
-                Map<String, BackupJob> loadedJobs = service.getObjectMapper().readValue(
+                Map<String, Job> loadedJobs = service.getObjectMapper().readValue(
                     jobsFilePath.toFile(),
-                    service.getObjectMapper().getTypeFactory().constructMapType(Map.class, String.class, BackupJob.class)
+                    service.getObjectMapper().getTypeFactory().constructMapType(Map.class, String.class, Job.class)
                 );
                 repository.getJobs().putAll(loadedJobs);
             } catch (IOException e) {
@@ -125,7 +125,7 @@ public class BackupRepositoryBuilder {
         }
     }
 
-    public BackupRepository build() {
+    public Repository build() {
         return repository; // Return the fully constructed repository
     }
 }

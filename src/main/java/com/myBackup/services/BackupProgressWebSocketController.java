@@ -17,7 +17,7 @@ public class BackupProgressWebSocketController {
     }
 
     @EventListener
-    public void handleBackupProgressEvent(BackupTaskEvent event) {
+    public void handleBackupProgressEvent(TaskEvent event) {
         // Broadcast progress to clients via WebSocket
         logger.debug("Received event from source: {}", event.getSource());
         messagingTemplate.convertAndSend("/topic/backup-progress", event);

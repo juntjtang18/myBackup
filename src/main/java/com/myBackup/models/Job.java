@@ -4,7 +4,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
-public class BackupJob {
+public class Job {
     private String 		jobID;
     private List<String> clientIDs;   
     private String 		sourceDirectory;
@@ -14,7 +14,7 @@ public class BackupJob {
     private String 		cronExpression; // Crontab expression for scheduling
     private JobType 	type;
 
-    public BackupJob() {
+    public Job() {
         this.jobID = UUID.randomUUID().toString();     // Generate unique job ID    	
     }
     
@@ -24,14 +24,14 @@ public class BackupJob {
     }
 
     // Constructor with only the mandatory fields: creator and creationTime
-    public BackupJob(List<String> clientIDs) {
+    public Job(List<String> clientIDs) {
         this.jobID = UUID.randomUUID().toString();     // Generate unique job ID
         this.creationTime = Instant.now(); 
         this.type = JobType.REGULAR;
     }
 
     // Full constructor for cases where all fields are provided
-    public BackupJob(List<String> clientIDs, 
+    public Job(List<String> clientIDs, 
     					String sourceDirectory, 
     					String repositoryID,
     					String creator, 

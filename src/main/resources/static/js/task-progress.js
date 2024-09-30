@@ -34,13 +34,13 @@
         } else {
             // Add new task
             tasks[taskId] = {
-                srcDirectory: data.backupTask.backupJob.sourceDirectory,
-                destDirectory: data.backupTask.backupJob.destinationDirectory,
+                srcDirectory: data.backupTask.srcDir,
+                destDirectory: data.backupTask.dstDir,
                 progressPercentage: data.progressPercentage,
                 status: data.backupTask.status
             };
 
-            addNewProgressBar(taskId, data.backupTask.backupJob.sourceDirectory, data.backupTask.backupJob.destinationDirectory, targetElementId);
+            addNewProgressBar(taskId, data.backupTask.srcDir, data.backupTask.dstDir, targetElementId);
             updateProgressBar(taskId, data.progressPercentage, data.backupTask.status);
         }
     }

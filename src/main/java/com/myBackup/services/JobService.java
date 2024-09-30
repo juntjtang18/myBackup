@@ -2,7 +2,7 @@ package com.myBackup.services;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.myBackup.models.BackupJob;
+import com.myBackup.models.Job;
 
 import com.myBackup.config.Config; // Assuming Config is in this package
 import org.springframework.stereotype.Service;
@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 @Service
 public class JobService {
     private final ObjectMapper objectMapper;
-    private final Map<String, BackupJob> jobMap; // Map for jobs
+    private final Map<String, Job> jobMap; // Map for jobs
     private Map<String, List<String>> creatorIndex; // Map to index jobs by creator
     private final String filePath;
     private final Config config;
@@ -65,59 +65,59 @@ public class JobService {
         }
     }
 
-    private Map<String, BackupJob> loadJobsFromFile() {
+    private Map<String, Job> loadJobsFromFile() {
         File file = new File(filePath);
         if (!file.exists()) {
             return Collections.emptyMap(); // Return an empty map if the file doesn't exist
         }
         try {
             // Load jobs and create a map with jobID as the key
-            List<BackupJob> jobList = objectMapper.readValue(file, new TypeReference<List<BackupJob>>() {});
-            return jobList.stream().collect(Collectors.toMap(BackupJob::getJobID, job -> job));
+            List<Job> jobList = objectMapper.readValue(file, new TypeReference<List<Job>>() {});
+            return jobList.stream().collect(Collectors.toMap(Job::getJobID, job -> job));
         } catch (IOException e) {
             e.printStackTrace(); // Handle the error appropriately (consider logging)
             return Collections.emptyMap();
         }
     }
     
-    private Map<String, List<String>> buildCreatorIndex(Map<String, BackupJob> jobMap) {
+    private Map<String, List<String>> buildCreatorIndex(Map<String, Job> jobMap) {
         Map<String, List<String>> index = new ConcurrentHashMap<>();
-        for (BackupJob job : jobMap.values()) {
+        for (Job job : jobMap.values()) {
             index.computeIfAbsent(job.getCreator().toLowerCase(), k -> new java.util.ArrayList<>())
                  .add(job.getJobID());
         }
         return index;
     }
 
-    public Map<String, BackupJob> getAllJobs() {
+    public Map<String, Job> getAllJobs() {
         return Collections.unmodifiableMap(jobMap); // Return an unmodifiable view of the map
     }
 
-    public Optional<BackupJob> getJobById(String jobId) {
+    public Optional<Job> getJobById(String jobId) {
         return Optional.ofNullable(jobMap.get(jobId)); // Get job by ID
     	//return jobMap.get(jobId);
     }
 
-    public List<BackupJob> getJobsByCreator(String creatorName) {
+    public List<Job> getJobsByCreator(String creatorName) {
         List<String> jobIds = creatorIndex.getOrDefault(creatorName.toLowerCase(), Collections.emptyList());
         return jobIds.stream()
                      .map(jobMap::get)
                      .collect(Collectors.toList());
     }
     
-    public List<BackupJob> getByRepositoryID(String repositoryID) {
+    public List<Job> getByRepositoryID(String repositoryID) {
         return jobMap.values().stream()
                 .filter(job -> job.getRepositoryID().equals(repositoryID))
                 .collect(Collectors.toList());
     }
 
-    public void addJob(BackupJob job) {
+    public void addJob(Job job) {
         jobMap.put(job.getJobID(), job); // Use job ID as key
         indexJobByCreator(job); // Update the creator index
         saveJobsToFile();
     }
 
-    public void updateJob(String jobId, BackupJob updatedJob) {
+    public void updateJob(String jobId, Job updatedJob) {
         if (jobMap.containsKey(jobId)) {
             // Remove the old job from the creator index
             removeJobFromCreatorIndex(jobId);
@@ -128,14 +128,14 @@ public class JobService {
     }
 
     public void deleteJob(String jobId) {
-        BackupJob removedJob = jobMap.remove(jobId); // Remove job from the map
+        Job removedJob = jobMap.remove(jobId); // Remove job from the map
         if (removedJob != null) {
             removeJobFromCreatorIndex(jobId); // Update the creator index
         }
         saveJobsToFile();
     }
 
-    private void indexJobByCreator(BackupJob job) {
+    private void indexJobByCreator(Job job) {
         creatorIndex.computeIfAbsent(job.getCreator().toLowerCase(), k -> new java.util.ArrayList<>())
                     .add(job.getJobID());
     }

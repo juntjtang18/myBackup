@@ -1,9 +1,12 @@
 package com.myBackup.services;
 
-import com.myBackup.models.BackupTask;
+import java.util.List;
+
+import com.myBackup.models.Task;
 
 public interface TaskQueue {
-    void add(BackupTask backupTask);
-    BackupTask take() throws InterruptedException;
+    void add(Task backupTask);
+    Task take() throws InterruptedException;
     int size();
+	void addAll(List<Task> tasks);
 }

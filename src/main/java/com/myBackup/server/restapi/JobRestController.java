@@ -1,8 +1,9 @@
 package com.myBackup.server.restapi;
 
-import com.myBackup.models.BackupJob;
-import com.myBackup.models.BackupTask;
+import com.myBackup.models.Job;
+import com.myBackup.models.Task;
 import com.myBackup.services.JobService;
+import com.myBackup.services.TaskBuilder;
 import com.myBackup.services.TaskQueue;
 
 import org.slf4j.Logger;
@@ -27,14 +28,16 @@ public class JobRestController {
     
     private final JobService jobService;
     private final TaskQueue taskQueue;
+    private final TaskBuilder taskBuilder;
     
-    public JobRestController(JobService jobService, TaskQueue taskQueue) {
+    public JobRestController(JobService jobService, TaskQueue taskQueue, TaskBuilder taskBuilder) {
         this.jobService = jobService;
         this.taskQueue = taskQueue;
+        this.taskBuilder = taskBuilder;
     }
 
     @PostMapping("/")
-    public ResponseEntity<BackupJob> createJob(@RequestBody JobRequest jobRequest) {
+    public ResponseEntity<Job> createJob(@RequestBody JobRequest jobRequest) {
         // Logger instance for the class
         // Log the JobRequest object
         logger.info("Received JobRequest: {}", jobRequest);
@@ -46,7 +49,7 @@ public class JobRestController {
         }
 
         // Map JobRequest to BackupJob
-        BackupJob backupJob = new BackupJob();
+        Job backupJob = new Job();
         backupJob.setJobID(UUID.randomUUID().toString());
         backupJob.setClientIDs(jobRequest.getClientIDs());
         backupJob.setSourceDirectory(jobRequest.getSourceDirectory());
@@ -66,26 +69,26 @@ public class JobRestController {
         return ResponseEntity.status(HttpStatus.CREATED).body(backupJob);
     }
     @GetMapping("/{jobId}")
-    public ResponseEntity<BackupJob> getJob(@PathVariable String jobId) {
-        Optional<BackupJob> existingJob = jobService.getJobById(jobId);
+    public ResponseEntity<Job> getJob(@PathVariable String jobId) {
+        Optional<Job> existingJob = jobService.getJobById(jobId);
         return existingJob.map(ResponseEntity::ok)
                  .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
 
     @GetMapping("/")
-    public ResponseEntity<Map<String, BackupJob>> getAllJobs() {
+    public ResponseEntity<Map<String, Job>> getAllJobs() {
         return ResponseEntity.ok(jobService.getAllJobs());
     }
 
     @GetMapping("/creator/{creatorName}")
-    public ResponseEntity<List<BackupJob>> getJobsByCreator(@PathVariable String creatorName) {
-        List<BackupJob> jobsByCreator = jobService.getJobsByCreator(creatorName);
+    public ResponseEntity<List<Job>> getJobsByCreator(@PathVariable String creatorName) {
+        List<Job> jobsByCreator = jobService.getJobsByCreator(creatorName);
         return ResponseEntity.ok(jobsByCreator);
     }
 
     @PutMapping("/{jobId}")
-    public ResponseEntity<BackupJob> updateJob(@PathVariable String jobId, @RequestBody BackupJob updatedJob) {
-        Optional<BackupJob> existingJob = jobService.getJobById(jobId);
+    public ResponseEntity<Job> updateJob(@PathVariable String jobId, @RequestBody Job updatedJob) {
+        Optional<Job> existingJob = jobService.getJobById(jobId);
         if (existingJob.isPresent()) {
             jobService.updateJob(jobId, updatedJob);
             return ResponseEntity.ok(updatedJob);
@@ -95,7 +98,7 @@ public class JobRestController {
 
     @DeleteMapping("/{jobId}")
     public ResponseEntity<Void> deleteJob(@PathVariable String jobId) {
-        Optional<BackupJob> existingJob = jobService.getJobById(jobId);
+        Optional<Job> existingJob = jobService.getJobById(jobId);
         if (existingJob.isPresent()) {
             jobService.deleteJob(jobId);
             return ResponseEntity.noContent().build();
@@ -115,7 +118,7 @@ public class JobRestController {
         }
 
         //String username = getCurrentUser(); // Get the username from SecurityContextHolder
-        Optional<BackupJob> optionalJob = jobService.getJobById(jobID);
+        Optional<Job> optionalJob = jobService.getJobById(jobID);
         
         if (!optionalJob.isPresent()) {
             Map<String, String> errorResponse = new HashMap<>();
@@ -123,8 +126,8 @@ public class JobRestController {
             return ResponseEntity.badRequest().body(errorResponse);        	
         }
         
-        BackupTask task = new BackupTask(optionalJob.get());
-        taskQueue.add(task);
+        List<Task> tasks = taskBuilder.withBackupJob(optionalJob.get()).build();
+        taskQueue.addAll(tasks);
 
         // Respond with JSON indicating the job execution has started
         Map<String, String> successResponse = new HashMap<>();

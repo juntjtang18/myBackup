@@ -1,12 +1,13 @@
 package com.myBackup.future;
 
-import com.myBackup.models.BackupTask;
+import com.myBackup.models.Task;
 import com.myBackup.services.TaskQueue;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.DeliverCallback;
 import com.rabbitmq.client.MessageProperties;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeoutException;
@@ -21,7 +22,7 @@ public class TaskQueueRabbitMQImpl implements TaskQueue {
     }
 
     @Override
-    public void add(BackupTask task) {
+    public void add(Task task) {
         try {
             String serializedTask = serializeTask(task);
             channel.basicPublish("", "backup_tasks", MessageProperties.PERSISTENT_TEXT_PLAIN, serializedTask.getBytes());
@@ -31,13 +32,13 @@ public class TaskQueueRabbitMQImpl implements TaskQueue {
     }
 
     @Override
-    public BackupTask take() {
-        final BlockingQueue<BackupTask> taskQueue = new ArrayBlockingQueue<>(1);
+    public Task take() {
+        final BlockingQueue<Task> taskQueue = new ArrayBlockingQueue<>(1);
 
         try {
             DeliverCallback deliverCallback = (consumerTag, delivery) -> {
                 String message = new String(delivery.getBody(), "UTF-8");
-                BackupTask task = deserializeTask(message);
+                Task task = deserializeTask(message);
                 taskQueue.offer(task);  // Add task to the queue
                 channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
             };
@@ -67,13 +68,19 @@ public class TaskQueueRabbitMQImpl implements TaskQueue {
         }
     }
 
-    private String serializeTask(BackupTask task) {
+    private String serializeTask(Task task) {
         // Serialize the BackupTask object to a JSON string or any other format
         return task.toString(); // Example, customize the serialization logic as needed
     }
 
-    private BackupTask deserializeTask(String message) {
+    private Task deserializeTask(String message) {
         // Deserialize the message back to a BackupTask object
-        return new BackupTask(null); // Example, customize the deserialization logic as needed
+        return new Task(); // Example, customize the deserialization logic as needed
     }
+
+	@Override
+	public void addAll(List<Task> tasks) {
+		// TODO Auto-generated method stub
+		
+	}
 }

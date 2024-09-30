@@ -13,11 +13,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.myBackup.client.services.UUIDService;
-import com.myBackup.models.BackupJob;
+import com.myBackup.models.Job;
 import com.myBackup.server.meta.ServersService;
 import com.myBackup.server.meta.ServersService.Server;
-import com.myBackup.server.repository.BackupRepository;
-import com.myBackup.server.repository.BackupRepositoryService;
+import com.myBackup.server.repository.Repository;
+import com.myBackup.server.repository.RepositoryService;
 import com.myBackup.services.JobService;
 
 @Controller
@@ -25,11 +25,11 @@ public class RepositoryController {
     private static final Logger logger = LoggerFactory.getLogger(RepositoryController.class);
     
     private final UUIDService uuidService;
-    private final BackupRepositoryService backupRepositoryService;
+    private final RepositoryService backupRepositoryService;
     private final ServersService serversService;
     private final JobService jobService;
     
-    public RepositoryController(UUIDService uuidService, BackupRepositoryService backupRepositoryService, ServersService serversService, JobService jobService) {
+    public RepositoryController(UUIDService uuidService, RepositoryService backupRepositoryService, ServersService serversService, JobService jobService) {
     	this.uuidService = uuidService;
     	this.backupRepositoryService = backupRepositoryService;
     	this.serversService = serversService;
@@ -57,7 +57,7 @@ public class RepositoryController {
         logger.info("Fetching details for repository ID: {}", repoId);
         
         // Fetch the repository details using the repoId
-        BackupRepository repository = backupRepositoryService.getRepositoryById(repoId); // Implement this method in your service
+        Repository repository = backupRepositoryService.getRepositoryById(repoId); // Implement this method in your service
         
         if (repository == null) {
             logger.error("Repository not found for ID: {}", repoId);
@@ -73,9 +73,9 @@ public class RepositoryController {
         // Get the clientID from UUIDService
         String clientID = uuidService.getUUID();
         model.addAttribute("clientID", clientID); // Add the clientID to the model
-        List<BackupJob.JobType> jobTypes = Arrays.asList(BackupJob.JobType.values());
+        List<Job.JobType> jobTypes = Arrays.asList(Job.JobType.values());
         model.addAttribute("jobTypes", jobTypes);
-        List<BackupJob> jobs = jobService.getByRepositoryID(repoId);
+        List<Job> jobs = jobService.getByRepositoryID(repoId);
         model.addAttribute("jobs", jobs);
         
         return "repository-details"; // The view to render the repository details

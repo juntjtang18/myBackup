@@ -3,7 +3,7 @@ package com.myBackup.server.restapi;
 import java.time.Instant;
 import java.util.List;
 
-import com.myBackup.models.BackupJob;
+import com.myBackup.models.Job;
 
 public class JobRequest {
     private String jobID;
@@ -13,7 +13,7 @@ public class JobRequest {
     private String creator;
     private Instant creationTime;
     private String cronExpression;
-    private BackupJob.JobType type; // Use JobType enum from BackupJob
+    private Job.JobType type; // Use JobType enum from BackupJob
 
     // Default constructor
     public JobRequest() {}
@@ -21,7 +21,7 @@ public class JobRequest {
     // Full constructor
     public JobRequest(String jobID, List<String> clientIDs, String sourceDirectory,
                       String repositoryID, String creator, Instant creationTime,
-                      String cronExpression, BackupJob.JobType type) {
+                      String cronExpression, Job.JobType type) {
         this.jobID = jobID;
         this.clientIDs = clientIDs;
         this.sourceDirectory = sourceDirectory;
@@ -90,11 +90,11 @@ public class JobRequest {
         this.cronExpression = cronExpression;
     }
 
-    public BackupJob.JobType getType() {
+    public Job.JobType getType() {
         return type;
     }
 
-    public void setType(BackupJob.JobType type) {
+    public void setType(Job.JobType type) {
         this.type = type;
     }
     @Override

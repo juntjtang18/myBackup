@@ -6,22 +6,22 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.event.EventListener;
 
 import com.myBackup.models.Backup;
-import com.myBackup.models.BackupTask;
-import com.myBackup.models.BackupTask.TaskStatus;
-import com.myBackup.server.repository.BackupRepositoryService;
+import com.myBackup.models.Task;
+import com.myBackup.models.Task.TaskStatus;
+import com.myBackup.server.repository.RepositoryService;
 import com.myBackup.services.TaskDispatcher.ShutdownEvent;
 
 import java.io.File;
 
 public class BackupWorker implements Runnable {
     private static final Logger logger = LogManager.getLogger(BackupWorker.class);
-    private BackupTask task;
+    private Task task;
     private ApplicationEventPublisher eventPublisher;
-    private BackupRepositoryService repoService;
+    private RepositoryService repoService;
     private volatile boolean running = true; // Control flag
     
     // Constructor
-    public BackupWorker(BackupTask task, ApplicationEventPublisher eventPublisher, BackupRepositoryService repoService) {
+    public BackupWorker(Task task, ApplicationEventPublisher eventPublisher, RepositoryService repoService) {
         this.task = task;
         this.eventPublisher = eventPublisher;
         this.repoService = repoService;
@@ -51,7 +51,7 @@ public class BackupWorker implements Runnable {
             int progress = i * 10;
             logger.debug("Task{} is in progress {}", task.getTaskId(), progress);
             task.setStatus(TaskStatus.IN_PROGRESS);
-            eventPublisher.publishEvent(new BackupTaskEvent(this, task, progress)); // Report 100% progress
+            eventPublisher.publishEvent(new TaskEvent(this, task, progress)); // Report 100% progress
             if (!running) {
                 logger.info("Worker for task {} interrupted.", task.getTaskId());
                 return;
@@ -59,7 +59,7 @@ public class BackupWorker implements Runnable {
         }
         logger.info("Backup task {} completed.", task.getTaskId());
         task.setStatus(TaskStatus.COMPLETED);
-        eventPublisher.publishEvent(new BackupTaskEvent(this, task, 100)); // Report 100% progress
+        eventPublisher.publishEvent(new TaskEvent(this, task, 100)); // Report 100% progress
     }
 
     private void processTask2() throws InterruptedException {
@@ -67,10 +67,10 @@ public class BackupWorker implements Runnable {
         try {
             logger.info("Starting backup task: {}", taskId);
             task.setStatus(TaskStatus.IN_PROGRESS);
-            eventPublisher.publishEvent(new BackupTaskEvent(this, task, 0)); // Notify start
+            eventPublisher.publishEvent(new TaskEvent(this, task, 0)); // Notify start
 
-            String sourceDirectory = task.getBackupJob().getSourceDirectory();
-            String repoID = task.getBackupJob().getRepositoryID();
+            String sourceDirectory = task.getSrcDir();
+            String repoID = task.getRepoID();
             String destDirectory = repoService.getRepositoryById(repoID).getDestDirectory();
             
             // Check if source directory exists
@@ -78,7 +78,7 @@ public class BackupWorker implements Runnable {
             if (!sourceDir.exists() || !sourceDir.isDirectory()) {
                 logger.error("Source directory {} does not exist, exiting backup.", sourceDirectory);
                 task.setStatus(TaskStatus.FAILED);
-                eventPublisher.publishEvent(new BackupTaskEvent(this, task, 0, "Source directory not found"));
+                eventPublisher.publishEvent(new TaskEvent(this, task, 0, "Source directory not found"));
                 return;
             }
 
@@ -89,7 +89,7 @@ public class BackupWorker implements Runnable {
             long totalDataSize = isFirstBackup ? calculateTotalDataSize(sourceDir) : lastBackupSize;
 
             // Create a new Backup object
-            Backup backup = new Backup(task.getBackupJob().getCreator(), sourceDirectory, destDirectory);
+            Backup backup = new Backup("", sourceDirectory, destDirectory);
             //BackupTree backupTree = backup.getTree();
 
             // Start processing files
@@ -102,12 +102,12 @@ public class BackupWorker implements Runnable {
             // Notify completion
             logger.info("Backup task {} completed.", taskId);
             task.setStatus(TaskStatus.COMPLETED);
-            eventPublisher.publishEvent(new BackupTaskEvent(this, task, 100)); // Report 100% progress
+            eventPublisher.publishEvent(new TaskEvent(this, task, 100)); // Report 100% progress
 
         } catch (Exception e) {
             logger.error("Backup task {} failed: {}", taskId, e.getMessage());
             task.setStatus(TaskStatus.FAILED);
-            eventPublisher.publishEvent(new BackupTaskEvent(this, task, 0, e.getMessage()));
+            eventPublisher.publishEvent(new TaskEvent(this, task, 0, e.getMessage()));
         }
     }
 
