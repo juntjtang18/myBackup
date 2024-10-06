@@ -1,106 +1,196 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - myBackup</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <title>My Backup Home</title>
+    <!-- CSRF Token as Meta Tag -->
+    <meta name="_csrf" th:content="${_csrf.token}">
+    <meta name="_csrf_header" th:content="${_csrf.headerName}">
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
     <style>
+        /* Custom Styles inspired by Apple */
         body {
-            font-family: 'Arial', sans-serif;
-            background-color: #f5f5f7; /* Light background similar to Apple's */
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
+            background-color: #ffffff; /* Clean white background */
+            color: #333333; /* Dark gray text for better contrast */
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; /* Apple system font */
         }
-        .container {
-            background-color: white;
-            padding: 40px 30px;
-            border-radius: 12px;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
-            text-align: center;
-            width: 350px; /* Set a fixed width for the login box */
+
+        .navbar {
+            background-color: #f8f8f8; /* Light gray background for navbar */
+            border-bottom: 1px solid #e6e6e6; /* Subtle border for separation */
         }
-        .logo {
-            max-width: 150px; /* Logo size */
-            margin-bottom: 20px;
+
+        .navbar-brand,
+        .nav-link {
+            color: #333333 !important; /* Dark gray text for navbar */
         }
-        h1 {
-            font-size: 24px;
-            color: #333;
-            margin: 10px 0;
+
+        .navbar-brand:hover,
+        .nav-link:hover {
+            color: #0071e3 !important; /* Blue hover effect similar to Apple's links */
         }
-        .welcome-message {
-            font-size: 16px;
-            color: #666;
-            margin-bottom: 20px;
+
+        .hero-section {
+            background-color: #f5f5f7; /* Soft light gray background for hero section */
+            color: #333333; /* Dark gray text for readability */
+            padding: 60px 0;
         }
-        input[type="text"], input[type="password"] {
-            width: 80%; /* Set the width to 80% for more space */
-            padding: 12px 10px; /* Added padding for better appearance */
-            margin: 10px auto; /* Center the input fields */
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            font-size: 14px;
-            transition: border 0.3s;
-            display: block; /* Ensure inputs are block elements */
+
+        .hero-section h1 {
+            font-weight: 700; /* Bold text */
+            color: #333333; /* Dark text to stand out */
         }
-        input[type="text"]:focus, input[type="password"]:focus {
-            border-color: #0071e3; /* Focus color */
-            outline: none;
+
+        .hero-section p {
+            font-size: 1.5rem; /* Slightly larger font for clarity */
+            color: #6e6e73; /* Medium gray for secondary text */
         }
-        button {
-            background-color: #0071e3; /* Apple blue color */
-            color: white;
-            padding: 14px 20px; /* Increased padding for a longer button */
+
+        .btn-light {
+            background-color: #0071e3; /* Apple-style blue button */
+            color: #ffffff;
             border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 16px;
-            transition: background-color 0.3s;
-            width: 85%; /* Set button width to 85% for a better fit */
-            margin-top: 20px; /* Increased space above the button */
         }
-        button:hover {
-            background-color: #005bb5; /* Darker shade on hover */
+
+        .btn-light:hover {
+            background-color: #005bb5; /* Darker blue on hover */
+            color: #ffffff;
         }
-        .footer {
-            margin-top: 20px;
-            font-size: 12px;
-            color: #999;
+
+        .card {
+            background-color: #f8f8f8; /* Light gray card background */
+            border: none; /* No border for clean look */
+            transition: transform 0.2s, box-shadow 0.2s; /* Smooth transition effects */
+        }
+
+        .card:hover {
+            transform: scale(1.05); /* Scale effect on hover */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Light shadow for hover effect */
+        }
+
+        footer {
+            background-color: #f8f8f8; /* Light gray background for footer */
+            color: #333333; /* Dark gray text for footer */
+            padding: 20px 0;
+        }
+
+        footer a {
+            color: #0071e3; /* Blue color for footer links */
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            color: #005bb5; /* Darker blue on hover */
+        }
+
+        .profile-img {
+            width: 40px; /* Set desired width */
+            height: 40px; /* Set desired height */
+            border-radius: 50%; /* Make the image round */
+            margin-left: 10px; /* Space between navbar items */
         }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <!-- Logo at the top -->
-    <img src="path/to/your/logo.png" alt="myBackup Logo" class="logo">
-    
-    <h1>Login to myBackup</h1>
-    <div class="welcome-message">Please enter your credentials</div>
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg">
+        <div class="container">
+            <a class="navbar-brand" href="#">MyBackup</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="#">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">About</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/adminhome">Admin</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
 
-    <!-- Thymeleaf form for login -->
-    <form th:action="@{/login}" method="POST">
-        <!-- Input for username -->
-        <input type="text" name="username" placeholder="Username" required>
+    <!-- Hero Section -->
+    <header class="hero-section text-center">
+		<div class="container">
+		    <h1 class="display-4">Welcome to MyBackup</h1>
+		    <p class="lead">Your data is safe with us. Backup and restore made easy.</p>
+		
+		    <!-- Form for user login with Thymeleaf -->
+		    <form th:action="@{/login}" th:object="${user}" method="POST">
+		        <!-- Hidden input for username (passed from the controller) -->
+		        <input type="hidden" th:field="*{username}" th:value="${user.username}">
+		        
+		        <!-- Hidden input for password (passed from the controller) -->
+		        <input type="hidden" th:field="*{password}" th:value="${user.password}">
+		        
+		        <!-- Thymeleaf automatically includes the CSRF token -->
+		        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
         
-        <!-- Input for password -->
-        <input type="password" name="password" placeholder="Password" required>
-        
-        <!-- Thymeleaf automatically includes the CSRF token -->
-        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+ 		        <!-- Submit button -->
+		        <button type="submit" class="btn btn-light btn-lg">Get start</button>
+		    </form>
+		</div>
+    </header>
 
-        <!-- Submit button -->
-        <button type="submit">Start</button>
-    </form>
-
-    <div class="footer">
-        &copy; 2024 myBackup. All rights reserved.
+    <!-- Main Content -->
+    <div class="container my-5">
+        <h2 class="text-center mb-4">Features</h2>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card mb-4">
+                    <img src="/images/secure-backup.webp" class="card-img-top" alt="Feature 1">
+                    <div class="card-body">
+                        <h5 class="card-title">Secure Backup</h5>
+                        <p class="card-text">Keep your data safe with our secure backup solutions.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card mb-4">
+                    <img src="/images/feature2.png" class="card-img-top" alt="Feature 2">
+                    <div class="card-body">
+                        <h5 class="card-title">Easy Restore</h5>
+                        <p class="card-text">Quickly restore your data with just a few clicks.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card mb-4">
+                    <img src="/images/feature3.png" class="card-img-top" alt="Feature 3">
+                    <div class="card-body">
+                        <h5 class="card-title">Cloud Integration</h5>
+                        <p class="card-text">Seamlessly integrate with your favorite cloud services.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-</div>
 
+    <!-- Footer -->
+    <footer class="text-center py-4">
+        <div class="container">
+            <p class="m-0">© 2024 MyBackup. All rights reserved.</p>
+            <div>
+                <a href="#" class="me-3"><i class="bi bi-facebook"></i></a>
+                <a href="#" class="me-3"><i class="bi bi-twitter"></i></a>
+                <a href="#"><i class="bi bi-instagram"></i></a>
+            </div>
+        </div>
+    </footer>
+
+    <script src="/js/bootstrap.bundle.min.js"></script> <!-- Bootstrap Bundle with Popper -->
+    <script th:inline="javascript">
+	    var user = /*[[${user}]]*/ {};
+    
+	    console.log("User object:", user);    
+    </script>
 </body>
 </html>

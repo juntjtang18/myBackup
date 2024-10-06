@@ -5,11 +5,11 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.event.EventListener;
 
-import com.myBackup.models.Backup;
 import com.myBackup.models.Task;
 import com.myBackup.models.Task.TaskStatus;
-import com.myBackup.server.repository.RepositoryService;
 import com.myBackup.services.TaskDispatcher.ShutdownEvent;
+import com.myBackup.services.bfs.Backup;
+import com.myBackup.services.bfs.RepositoryStorage;
 
 import java.io.File;
 
@@ -17,11 +17,11 @@ public class BackupWorker implements Runnable {
     private static final Logger logger = LogManager.getLogger(BackupWorker.class);
     private Task task;
     private ApplicationEventPublisher eventPublisher;
-    private RepositoryService repoService;
+    private RepositoryStorage repoService;
     private volatile boolean running = true; // Control flag
     
     // Constructor
-    public BackupWorker(Task task, ApplicationEventPublisher eventPublisher, RepositoryService repoService) {
+    public BackupWorker(Task task, ApplicationEventPublisher eventPublisher, RepositoryStorage repoService) {
         this.task = task;
         this.eventPublisher = eventPublisher;
         this.repoService = repoService;
@@ -89,7 +89,7 @@ public class BackupWorker implements Runnable {
             long totalDataSize = isFirstBackup ? calculateTotalDataSize(sourceDir) : lastBackupSize;
 
             // Create a new Backup object
-            Backup backup = new Backup("", sourceDirectory, destDirectory);
+            Backup backup = new Backup("", null, null, sourceDirectory, destDirectory);
             //BackupTree backupTree = backup.getTree();
 
             // Start processing files

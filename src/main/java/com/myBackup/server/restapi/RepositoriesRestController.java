@@ -6,9 +6,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.myBackup.server.repository.RepositoryService;
-import com.myBackup.server.repository.Repository;
-import com.myBackup.server.repository.RepositoryBuilder;
+import com.myBackup.services.bfs.Repository;
+import com.myBackup.services.bfs.RepositoryStorageBuilder;
+import com.myBackup.services.bfs.RepositoryStorage;
 
 import java.io.File; // Import File for directory checking
 import java.util.List;
@@ -18,9 +18,9 @@ import java.util.List;
 public class RepositoriesRestController {
     private static final Logger logger = LoggerFactory.getLogger(RepositoriesRestController.class);
 
-    private final RepositoryService backupReposService;
+    private final RepositoryStorage backupReposService;
     
-    public RepositoriesRestController(RepositoryService backupReposService) {
+    public RepositoriesRestController(RepositoryStorage backupReposService) {
         this.backupReposService = backupReposService;
     }
     
@@ -50,7 +50,7 @@ public class RepositoriesRestController {
         }
 
         // If it doesn't exist, proceed to create the repository
-        Repository newRepository = new RepositoryBuilder(backupReposService)
+        Repository newRepository = new RepositoryStorageBuilder(backupReposService)
                                             .connectTo(request.getServerUrl(), request.getServerName())
                                             .mountTo(request.getDestDirectory())
                                             .grantTo(request.getClientID())
@@ -69,7 +69,7 @@ public class RepositoriesRestController {
     public ResponseEntity<Repository> confirmCreateRepository(@RequestBody CreateRepositoryRequest request) {
         logger.debug("/api/repositories/create/confirm called with destDirectory: {}, clientID: {}.", request.getDestDirectory(), request.getClientID());
 
-        Repository newRepository = new RepositoryBuilder(backupReposService)
+        Repository newRepository = new RepositoryStorageBuilder(backupReposService)
                                             .connectTo(request.getServerUrl(), request.getServerName())
                                             .mountTo(request.getDestDirectory())
                                             .grantTo(request.getClientID())

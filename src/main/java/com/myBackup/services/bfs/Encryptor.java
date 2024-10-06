@@ -1,4 +1,4 @@
-package com.myBackup.services.BlockStorage;
+package com.myBackup.services.bfs;
 
 public interface Encryptor {
     byte[] encrypt(byte[] data);

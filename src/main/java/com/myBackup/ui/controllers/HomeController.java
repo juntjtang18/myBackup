@@ -1,86 +1,120 @@
 package com.myBackup.ui.controllers;
 
-import com.myBackup.client.Utility;
 import com.myBackup.client.services.UUIDService;
 import com.myBackup.models.UserDto;
-import com.myBackup.server.meta.ServersService;
-import com.myBackup.server.meta.ServersService.Server;
-import com.myBackup.server.repository.RepositoryService;
-
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
-import java.util.List;
+import java.io.IOException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 public class HomeController {
+	
     private static final Logger logger = LoggerFactory.getLogger(HomeController.class);
-
+    @Autowired
     private UUIDService uuidService;
-    private final RepositoryService backupRepositoryService;
-    private ServersService serversService; // Inject the ServersService to access server data
-
-    public HomeController(UUIDService uuidService, RepositoryService backupRepositoryService, ServersService serversService) {
-        this.uuidService = uuidService;
-        this.backupRepositoryService = backupRepositoryService;
-        this.serversService = serversService;
-    }
+    @Autowired
+    private AuthenticationManager authenticationManager;
 
     @GetMapping("/")
     public String originalStart(HttpServletRequest request, Model model) {
-        // Get the remote IP address of the request
         String remoteAddr = request.getRemoteAddr();
-        
         logger.info("Request from {} received. ", remoteAddr);
         
-        // Check if the request is coming from the local machine
-        if (isLocalRequest(remoteAddr)) {
-            // Create a new UserDto object and set username and MAC address
-            UserDto user = new UserDto();
-            user.setUsername(System.getProperty("user.name"));
-            user.setPassword(Utility.getMACAddress());  // Assuming password field will be used for MAC address
+        UserDto user = new UserDto();
+        user.setUsername(System.getProperty("user.name"));
+        user.setPassword(uuidService.getUUID());              
+        model.addAttribute("user", user);  
 
-            model.addAttribute("user", user);  // Add the user object to the model
+        return "login";  // This template should handle user input separately
+    }
 
-            logger.info("Request from local machine, redirecting to auto-login.html with user: {}", user);
+    @GetMapping("/login")
+    public String showLoginPage(HttpServletRequest request, Model model) {
+        UserDto user = new UserDto();
+        user.setUsername(System.getProperty("user.name"));
+        user.setPassword(uuidService.getUUID());              
+        model.addAttribute("user", user);  
+        return "login";
+    }
+    
+    @PostMapping("/login")
+    public void login(@RequestParam String username, 
+                      @RequestParam String password, 
+                      HttpServletResponse response) throws IOException {
+        try {
+            // Create an authentication token with the provided credentials
+            UsernamePasswordAuthenticationToken authenticationToken =
+                    new UsernamePasswordAuthenticationToken(username, password);
 
-            // Redirect to auto-login.html
-            return "auto-login";  // Assuming this template uses the 'user' object for binding
-        } else {
-            logger.info("Request not from local machine, redirecting to login.html.");
+            // Authenticate the user
+            Authentication authentication = authenticationManager.authenticate(authenticationToken);
+            
+            // If authentication is successful, redirect to /home
+            response.sendRedirect("/home");
 
-            // Redirect to login.html
-            return "login";  // This template should handle user input separately
+        } catch (AuthenticationException e) {
+            // If authentication fails, return 401 Unauthorized status
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Login failed: " + e.getMessage());
         }
     }
 
+
+    
+    @PostMapping("/logout")
+    public ResponseEntity<String> logout(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
+        if (authentication != null) {
+            // Perform logout by invalidating the user's session
+            new SecurityContextLogoutHandler().logout(request, response, authentication);
+        }
+        return ResponseEntity.ok("User logged out successfully");
+    }    
     // Utility method to check if the request is local
-    private boolean isLocalRequest(String remoteAddr) {
+    @SuppressWarnings("unused")
+	private boolean isLocalRequest(String remoteAddr) {
         return "127.0.0.1".equals(remoteAddr) || "localhost".equals(remoteAddr) || "::1".equals(remoteAddr) || "0:0:0:0:0:0:0:1".equals(remoteAddr);
     }
     
     @GetMapping("/home")
-    public String home() {
+    public String home(HttpServletRequest request, Model model) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.isAuthenticated()) {
+            Object principal = authentication.getPrincipal();
+
+            if (principal instanceof UserDetails) {
+                String username = ((UserDetails) principal).getUsername();
+                model.addAttribute("username", username);
+            } else {
+                model.addAttribute("username", principal.toString());
+            }
+        }
+        
+        String clientID = uuidService.getUUID();
+        model.addAttribute("clientID", clientID);
         return "home";
     }
     
     @GetMapping("/start")
     public String start() {
-        int repositoryCount = backupRepositoryService.repositoryCount();
-        logger.info("Repository count: {}", repositoryCount);
-        
-        if (repositoryCount == 0) {
-            logger.info("No repositories found, redirecting to repository-create.");
-            return "redirect:/repository-create";  // Redirect to the add repository endpoint
-        } else {
-            logger.info("Repositories found, redirecting to dashboard.");
-            return "redirect:/dashboard";  // Redirect to the dashboard endpoint
-        }
+    	return "dashboard";
     }
     
     @GetMapping("/testapi")

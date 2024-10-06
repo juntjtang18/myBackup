@@ -1,39 +1,42 @@
-package com.myBackup.services;
-
-import com.myBackup.services.BlockStorage.Block;
-import com.myBackup.services.BlockStorage.Encryptor;
+package com.myBackup.services.bfs;
 
 import java.io.*;
 import java.nio.file.*;
 import java.security.NoSuchAlgorithmException;
 
-public class BlockFileSystem {
-    private static final String BLOCKS_DIR = "blocks";
-    private static final String INDEX_DIR = Paths.get("blocks","index").toString();
-    private final Encryptor encryptor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 
-    public BlockFileSystem(Encryptor encryptor) {
-        this.encryptor = encryptor;
+public class BlockStorage {
+    private static final Logger logger = LoggerFactory.getLogger(BlockStorage.class);
+	
+    private String BLOCKS_DIR;
+    private Encryptor encryptor;
+
+    public BlockStorage(String repoDir) {
+        this.BLOCKS_DIR = Paths.get(repoDir, "blocks").toString();
         initializeDirectoryStructure();
     }
 
     private void initializeDirectoryStructure() {
+        // Create the base blocks directory first
+        Path blocksPath = Paths.get(BLOCKS_DIR);
         try {
-            // Create the base blocks directory first
-            Path blocksPath = Paths.get(BLOCKS_DIR);
-            Files.createDirectories(blocksPath);
-
-            // Create the index directory under the blocks directory
-            Path indexPath = Paths.get(BLOCKS_DIR, "index"); // INDEX_DIR is now relative to BLOCKS_DIR
-            Files.createDirectories(indexPath);
-
-            System.out.println("Directories created successfully.");
+            // Check if the directory exists before creating it
+            if (!Files.exists(blocksPath)) {
+                Files.createDirectories(blocksPath);                
+                logger.debug("Blocks directory created successfully at ", blocksPath);
+            } else {
+                logger.debug("Blocks directory already exists.", blocksPath);
+            }
         } catch (IOException e) {
-            System.err.println("Error creating directories: " + e.getMessage());
+            logger.error("Error creating blocks directory(", blocksPath, ": ", e.getMessage());
         }
     }
 
-    public void storeBlock(String hash, byte[] blockData, boolean encrypt) throws IOException, NoSuchAlgorithmException {
+
+    public String storeBlock(String hash, byte[] blockData, boolean encrypt) throws IOException, NoSuchAlgorithmException {
         String filePath = getBlockFilePath(hash);
         Block block = new Block(blockData, encrypt, hash);
 
@@ -50,11 +53,12 @@ public class BlockFileSystem {
             raf.seek(raf.length());
 
             long offset = raf.getFilePointer(); // Get the current file pointer position (after seeking to the end)
-            block.writeTo(raf); // Write the block to the file at the current pointer position
+            block.writeTo(raf);
             updateIndex(hash, filePath, offset); // Update index with the file path and offset
         }
+        // Verify the hash here, if needed
+        return hash;
     }
-
 
     public byte[] readBlock(String hash) throws IOException, NoSuchAlgorithmException {
         String[] indexEntry = findIndexEntry(hash);
@@ -74,14 +78,26 @@ public class BlockFileSystem {
     }
 
     private void updateIndex(String hash, String filePath, long offset) throws IOException {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(INDEX_DIR + "/index.bfs", true))) {
+        String indexFilePath = getIndexFilePath(hash);
+
+        // Create the index file, parent directories if they don't exist
+        File indexFile = new File(indexFilePath);
+        indexFile.getParentFile().mkdirs(); // Ensure the parent directories exist
+
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(indexFile, true))) {
             writer.write(hash + "," + filePath + "," + offset);
             writer.newLine();
         }
     }
 
     private String[] findIndexEntry(String hash) throws IOException {
-        try (BufferedReader reader = new BufferedReader(new FileReader(INDEX_DIR + "/index.bfs"))) {
+        String indexFilePath = getIndexFilePath(hash);
+        File indexFile = new File(indexFilePath);
+
+        // If the index file does not exist, return null
+        if (!indexFile.exists()) return null;
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(indexFile))) {
             String line;
             while ((line = reader.readLine()) != null) {
                 String[] parts = line.split(",");
@@ -91,12 +107,23 @@ public class BlockFileSystem {
         return null;
     }
 
-    private String getBlockFilePath(String hash) {
-        return BLOCKS_DIR + "/" + hash.substring(0, 2) + "/" + hash.substring(2, 4) + ".bfs";
+    private String getIndexFilePath(String hash) {
+        // Use the same directory structure as block files for the index files
+        return Paths.get(BLOCKS_DIR, hash.substring(0, 2), hash.substring(2, 4), hash.substring(4, 6), hash.substring(6,8) + ".idx").toString();
     }
 
-    public static void main(String[] args) throws NoSuchAlgorithmException {
-        BlockFileSystem bfs = new BlockFileSystem(null);
+    private String getBlockFilePath(String hash) {
+        return Paths.get(BLOCKS_DIR, hash.substring(0, 2), hash.substring(2, 4), hash.substring(4, 6), hash.substring(6,8) + ".bfs").toString();
+    }
+
+    public boolean doesBlockExist(String hash) {
+        String filePath = getBlockFilePath(hash); // Get the block file path
+        File file = new File(filePath); // Create a File object
+        return file.exists(); // Return true if the file exists, false otherwise
+    }
+
+    public static void main(String[] args) throws Exception {
+        BlockStorage bfs = new BlockStorage(System.getProperty("user.dir"));
         String hash = "bbxxd1234ef56780";
         byte[] blockData = "Sample Block Data4443".getBytes();
 
@@ -104,6 +131,10 @@ public class BlockFileSystem {
             bfs.storeBlock(hash, blockData, false);
             byte[] retrievedData = bfs.readBlock(hash);
             System.out.println("Retrieved Block Data: " + new String(retrievedData));
+
+            // Check if the block exists
+            boolean exists = bfs.doesBlockExist(hash);
+            System.out.println("Does Block Exist: " + exists);
         } catch (IOException e) {
             System.err.println("Error storing or reading block: " + e.getMessage());
         }

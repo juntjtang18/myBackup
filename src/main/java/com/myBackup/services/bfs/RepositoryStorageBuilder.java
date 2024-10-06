@@ -1,4 +1,4 @@
-package com.myBackup.server.repository;
+package com.myBackup.services.bfs;
 
 import com.myBackup.models.Job;
 import java.io.IOException;
@@ -8,24 +8,21 @@ import java.nio.file.Paths;
 import java.util.Map;
 import java.util.Set;
 
-public class RepositoryBuilder {
-    private final RepositoryService service;
+public class RepositoryStorageBuilder {
+    private final RepositoryStorage service;
     private Repository repository;
      
-    public RepositoryBuilder(RepositoryService service) {
+    public RepositoryStorageBuilder(RepositoryStorage service) {
         this.service = service;
-        this.repository = service.buildRepository(); // Create a new repository instance
+        this.repository = service.buildRepository();
     }
 
-    public RepositoryBuilder mountTo(String destination) {
-        // Validate the destination parameter
+    public RepositoryStorageBuilder mountTo(String destination) {
         if (destination == null || destination.isEmpty()) {
             throw new IllegalArgumentException("Destination directory must not be empty.");
         }
 
         Path dirPath = Paths.get(destination);
-
-        // Check if the destination directory exists
         if (!Files.exists(dirPath)) {
             try {
                 Files.createDirectories(dirPath); // Create the directory if it doesn't exist
@@ -45,7 +42,7 @@ public class RepositoryBuilder {
         return this;
     }
 
-    public RepositoryBuilder grantTo(String clientID) {
+    public RepositoryStorageBuilder grantTo(String clientID) {
         // Validate clientID
         if (clientID == null || clientID.isEmpty()) {
             throw new IllegalArgumentException("Client ID must not be empty.");
@@ -61,7 +58,7 @@ public class RepositoryBuilder {
     }
 
     // New method: Connect to server and set serverUrl
-    public RepositoryBuilder connectTo(String serverUrl, String serverName) {
+    public RepositoryStorageBuilder connectTo(String serverUrl, String serverName) {
         // Validate serverUrl
         if (serverUrl == null || serverUrl.isEmpty()) {
             throw new IllegalArgumentException("Server URL must not be empty.");
@@ -73,7 +70,7 @@ public class RepositoryBuilder {
         return this;
     }
     
-    public RepositoryBuilder connectTo(String serverUrl) {
+    public RepositoryStorageBuilder connectTo(String serverUrl) {
         // Validate serverUrl
         if (serverUrl == null || serverUrl.isEmpty()) {
             throw new IllegalArgumentException("Server URL must not be empty.");

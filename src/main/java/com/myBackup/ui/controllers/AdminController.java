@@ -1,10 +1,9 @@
 package com.myBackup.ui.controllers;
 
 import java.io.IOException;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,24 +12,26 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.myBackup.models.UserDto;
+import com.myBackup.security.User;
+import com.myBackup.security.UserRepository;
 import com.myBackup.security.UserService;
 
 import jakarta.servlet.http.HttpServletRequest;
 
 @Controller
 public class AdminController {
-    private final UserService userService;
-
-    @Autowired
-    public AdminController(UserService userService) {
-        this.userService = userService;
-    }
+	@Autowired
+    private UserService userService;
+	@Autowired
+    private UserRepository userRepository;
+	
     @GetMapping("/register")
     public String showRegisterForm(Model model) {
         model.addAttribute("userDto", new UserDto());
         return "register";
     }
 
+    //@RequiresRoles("admin") // Require admin role for user registration
     @PostMapping("/register")
     public String registerUser(@ModelAttribute("userDto") UserDto userDto, 
                                Model model, 
@@ -38,14 +39,8 @@ public class AdminController {
                                HttpServletRequest request) {
         try {
             // Check if the username already exists
-            UserDetails existingUser = null;
-            try {
-                existingUser = userService.loadUserByUsername(userDto.getUsername());
-            } catch (UsernameNotFoundException e) {
-                // User does not exist, continue with registration
-            }
-
-            if (existingUser != null) {
+            Optional<User> existingUser = userRepository.findByUsername(userDto.getUsername());
+            if (!existingUser.isEmpty()) {
                 model.addAttribute("error", "Username already exists.");
                 return "register";
             }
@@ -60,13 +55,14 @@ public class AdminController {
             // Get the referer URL from the request headers
             String referer = request.getHeader("Referer");
             
-            // Redirect to the referer page or default to login if referer is null
+            // Redirect to the referer page or default to home if referer is null
             return "redirect:" + (referer != null ? referer : "/home");
         } catch (IOException e) {
             model.addAttribute("error", "Failed to register user.");
             return "register"; // Return to the registration page with error message
         }
     }
+    
     
     @GetMapping("/admin/apitest")
     public String apiTest() {

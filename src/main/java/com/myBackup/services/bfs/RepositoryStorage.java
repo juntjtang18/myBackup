@@ -1,4 +1,4 @@
-package com.myBackup.server.repository;
+package com.myBackup.services.bfs;
 
 import jakarta.annotation.PreDestroy;
 import java.io.File;
@@ -19,16 +19,16 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.myBackup.config.Config;
 
 @Service
-public class RepositoryService {
+public class RepositoryStorage {
 
-    private static final Logger logger = LoggerFactory.getLogger(RepositoryService.class);
+    private static final Logger logger = LoggerFactory.getLogger(RepositoryStorage.class);
     private final String REPOSITORY_FILE_PATH;
     private final Map<String, Repository> repositoryCache = new ConcurrentHashMap<>();
     private final ReentrantLock lock = new ReentrantLock();
     private final ObjectMapper objectMapper; // Injected ObjectMapper
     private Config config;
     
-    public RepositoryService(ObjectMapper objectMapper, Config config) {
+    public RepositoryStorage(ObjectMapper objectMapper, Config config) {
         this.objectMapper = objectMapper;
         this.config = config;
         this.REPOSITORY_FILE_PATH = this.config.getBackupRepositoryFilePath();

@@ -1,18 +1,11 @@
 package com.myBackup.security;
 
-import java.util.Collection;
-import java.util.Collections;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
+public class User {
 
-public class User implements UserDetails {
-
-	private static final long serialVersionUID = 1L;
-	private String username;
-	private String encryptedPassword;
-	private String role;
-	private String email;
+    private String username;
+    private String encryptedPassword;
+    private String role;
+    private String email;
 
     // Constructor
     public User(String username, String encryptedPassword, String role, String email) {
@@ -53,17 +46,6 @@ public class User implements UserDetails {
 
     public void setEmail(String email) {
         this.email = email;
-    }
-
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        // Convert role to a list of GrantedAuthority
-        return Collections.singletonList(new SimpleGrantedAuthority(role));
-    }
-
-    @Override
-    public String getPassword() {
-        return encryptedPassword;
     }
 
 }

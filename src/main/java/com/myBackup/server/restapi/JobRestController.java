@@ -10,8 +10,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Instant;
@@ -38,17 +36,13 @@ public class JobRestController {
 
     @PostMapping("/")
     public ResponseEntity<Job> createJob(@RequestBody JobRequest jobRequest) {
-        // Logger instance for the class
-        // Log the JobRequest object
         logger.info("Received JobRequest: {}", jobRequest);
 
-        // Validate the creator field
         if (jobRequest.getCreator() == null || jobRequest.getCreator().trim().isEmpty()) {
             logger.warn("JobRequest validation failed: creator is null or empty");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
 
-        // Map JobRequest to BackupJob
         Job backupJob = new Job();
         backupJob.setJobID(UUID.randomUUID().toString());
         backupJob.setClientIDs(jobRequest.getClientIDs());
@@ -59,15 +53,11 @@ public class JobRestController {
         backupJob.setCronExpression(jobRequest.getCronExpression());
         backupJob.setType(jobRequest.getType());
 
-        // Add the job to the service
         jobService.addJob(backupJob);
-
-        // Log the created BackupJob
         logger.info("Created BackupJob: {}", backupJob);
-
-        // Return the created BackupJob in the response with status 201
         return ResponseEntity.status(HttpStatus.CREATED).body(backupJob);
     }
+    
     @GetMapping("/{jobId}")
     public ResponseEntity<Job> getJob(@PathVariable String jobId) {
         Optional<Job> existingJob = jobService.getJobById(jobId);
@@ -105,6 +95,7 @@ public class JobRestController {
         }
         return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
+    
     @PostMapping("/execute")
     public ResponseEntity<Map<String, String>> executeJob(@RequestBody Map<String, String> request) {
         String jobID = request.get("jobID");
@@ -135,10 +126,6 @@ public class JobRestController {
         return ResponseEntity.ok(successResponse);
     }
     
-    // Helper method to retrieve the current user's username from the SecurityContext
-    private String getCurrentUser() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        return authentication != null ? authentication.getName() : null; // Get the current username from the Authentication object
-    }
+
 }
 

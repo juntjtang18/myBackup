@@ -9,104 +9,119 @@ import java.io.*;
 import java.nio.file.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.ReentrantLock;
 
 @Component
 public class UserRepositoryFileImpl implements UserRepository {
     private static final Logger logger = LoggerFactory.getLogger(UserRepositoryFileImpl.class);
-
     private final Config config;
-    private List<User> users = new ArrayList<>();
-    private long lastModifiedTime = 0;  // Track last modified time of users.pwd
+    private Map<String, User> users = new ConcurrentHashMap<>(); // Use ConcurrentHashMap
+    private final ReentrantLock lock = new ReentrantLock(); // Lock for more complex operations
+    private long lastModifiedTime = 0;
 
     public UserRepositoryFileImpl(Config config) {
         this.config = config;
     }
 
     private String getUsersFilePath() {
-        return config.getUsersFilePath(); // Retrieve the path from the configuration
+        return config.getUsersFilePath();
     }
 
     @Override
     public synchronized Optional<User> findByUsername(String username) throws IOException {
         loadUsers();
-        return users.stream()
-            .filter(user -> user.getUsername().equals(username))
-            .findFirst();
+        return Optional.ofNullable(users.get(username));
     }
 
     @Override
-    public synchronized void save(User user) throws IOException {
-        String usersFilePath = getUsersFilePath();
-        Path filePath = Paths.get(usersFilePath);
-        Path directoryPath = filePath.getParent(); // Get the directory path
+    public void save(User user) throws IOException {
+        lock.lock(); // Acquire lock for critical section
+        try {
+            String usersFilePath = getUsersFilePath();
+            Path filePath = Paths.get(usersFilePath);
+            Path directoryPath = filePath.getParent();
 
-        // Check if the directory exists; if not, create it
-        if (directoryPath != null && !Files.exists(directoryPath)) {
-            Files.createDirectories(directoryPath);
-        }
-
-        // Check if the file exists; if not, create it
-        if (!Files.exists(filePath)) {
-            Files.createFile(filePath);
-        }
-
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(usersFilePath, true))) {
-            // Check if user already exists
-            for (User existingUser : users) {
-                if (existingUser.getUsername().equals(user.getUsername())) {
-                    throw new IllegalArgumentException("User already exists");
-                }
+            if (directoryPath != null && !Files.exists(directoryPath)) {
+                Files.createDirectories(directoryPath);
             }
-            // Add the new user
-            writer.write(String.format("%s:%s:%s:%s%n", user.getUsername(), user.getEncryptedPassword(), user.getRole(), user.getEmail()));
-            writer.flush();
 
-            // Add to in-memory cache
-            users.add(user);
+            if (!Files.exists(filePath)) {
+                Files.createFile(filePath);
+            }
+
+            if (users.putIfAbsent(user.getUsername(), user) != null) {
+                throw new IllegalArgumentException("User already exists");
+            }
+
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(usersFilePath, true))) {
+                writer.write(String.format("%s:%s:%s:%s%n", user.getUsername(), user.getEncryptedPassword(), user.getRole(), user.getEmail()));
+                writer.flush();
+            }
+        } finally {
+            lock.unlock(); // Ensure the lock is released
         }
     }
-    
+
     @Override
-    public void create() throws IOException {
-        String usersFilePath = getUsersFilePath();
-        Path filePath = Paths.get(usersFilePath);
+    public void updateUser(User updatedUser) throws IOException {
+        lock.lock(); // Acquire lock for critical section
+        try {
+            if (!users.containsKey(updatedUser.getUsername())) {
+                throw new IllegalArgumentException("User not found");
+            }
 
-        // Create the users file if it doesn't exist
-        File file = filePath.toFile();
-        if (!file.exists()) {
-            logger.debug("Creating new users file: {}", usersFilePath);
-            file.createNewFile();
+            users.put(updatedUser.getUsername(), updatedUser);
+            saveUsersToFile();
+        } finally {
+            lock.unlock(); // Ensure the lock is released
         }
     }
 
-    private synchronized void loadUsers() throws IOException {
+    private synchronized void saveUsersToFile() throws IOException {
         String usersFilePath = getUsersFilePath();
-        File usersFile = new File(usersFilePath);
-        long currentModifiedTime = usersFile.lastModified();
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(usersFilePath))) {
+            for (User user : users.values()) {
+                writer.write(String.format("%s:%s:%s:%s%n", user.getUsername(), user.getEncryptedPassword(), user.getRole(), user.getEmail()));
+            }
+        }
+    }
 
-        // Check if file has been updated since last load
-        if (currentModifiedTime > lastModifiedTime) {
-            logger.debug("Users file modified, reloading users...");
-            users.clear();
-            try (BufferedReader reader = new BufferedReader(new FileReader(usersFile))) {
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    String[] parts = line.split(":");
-                    if (parts.length == 4) {
-                        users.add(new User(parts[0], parts[1], parts[2], parts[3]));
+    private void loadUsers() throws IOException {
+        lock.lock(); // Acquire lock for critical section
+        try {
+            String usersFilePath = getUsersFilePath();
+            File usersFile = new File(usersFilePath);
+            long currentModifiedTime = usersFile.lastModified();
+
+            if (currentModifiedTime > lastModifiedTime) {
+                logger.debug("Users file modified, reloading users...");
+                users.clear(); // Clearing the map is safe here due to the lock
+                try (BufferedReader reader = new BufferedReader(new FileReader(usersFile))) {
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        String[] parts = line.split(":");
+                        if (parts.length == 4) {
+                            users.put(parts[0], new User(parts[0], parts[1], parts[2], parts[3]));
+                        }
                     }
                 }
+                lastModifiedTime = currentModifiedTime;
+            } else {
+                logger.debug("Users file not modified, using cached data.");
             }
-            lastModifiedTime = currentModifiedTime;  // Update the last modified time
-        } else {
-            logger.debug("Users file not modified, using cached data.");
+        } finally {
+            lock.unlock(); // Ensure the lock is released
         }
     }
     
     @Override
     public List<User> loadAllUsers() throws IOException {
-        loadUsers(); // Ensure the users are loaded or reloaded from the file
-        return new ArrayList<>(users); // Return a copy of the users list to avoid direct manipulation
-    }
+        loadUsers();
+        return new ArrayList<>(users.values()); // Return a copy of the values in the map
+    }   
+
 }
+

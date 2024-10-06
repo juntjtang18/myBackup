@@ -274,7 +274,7 @@
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             <img src="https://via.placeholder.com/40" class="avatar" alt="User Avatar"> 
-                            <span th:text="${user.username}">Username</span>
+                            <span th:text="${username}">Username</span>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
                             <li><a class="dropdown-item" href="/profile">Profile</a></li>
@@ -505,7 +505,7 @@
 	            var clientID = /*[[${clientID}]]*/ 'defaultClientID';
 	            var sourceDirectory = document.getElementById("sourceDirectory").value;
 	            var repositoryID = /*[[${repository.repoID}]]*/ 'defaultRepoID';
-	            var creator = /*[[${user.username}]]*/ 'defaultCreator';
+	            var creator = /*[[${username}]]*/ 'defaultCreator';
 	            var cronExpression = document.getElementById("cronExpression").value;
 	            var jobType = document.getElementById("jobType").value;
 	            const csrfToken = document.querySelector('input[name="_csrf"]').value;

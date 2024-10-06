@@ -1,176 +1,296 @@
 <!DOCTYPE html>
-<html lang="en">
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Backup Home</title>
-    <link rel="stylesheet" href="/css/bootstrap.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <title>Home - MyBackup System</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- DataTables CSS -->
+    <link href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Custom CSS -->
     <style>
-        /* Custom Styles inspired by Apple */
         body {
-            background-color: #ffffff; /* Clean white background */
-            color: #333333; /* Dark gray text for better contrast */
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; /* Apple system font */
+            background-color: #f5f5f7;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            color: #333;
         }
 
         .navbar {
-            background-color: #f8f8f8; /* Light gray background for navbar */
-            border-bottom: 1px solid #e6e6e6; /* Subtle border for separation */
+            background-color: #fff;
+            border-bottom: 1px solid #ddd;
         }
 
-        .navbar-brand,
-        .nav-link {
-            color: #333333 !important; /* Dark gray text for navbar */
+        .navbar-brand {
+            font-weight: bold;
+            color: #0071e3;
         }
 
-        .navbar-brand:hover,
-        .nav-link:hover {
-            color: #0071e3 !important; /* Blue hover effect similar to Apple's links */
-        }
-
-        .hero-section {
-            background-color: #f5f5f7; /* Soft light gray background for hero section */
-            color: #333333; /* Dark gray text for readability */
-            padding: 60px 0;
-        }
-
-        .hero-section h1 {
-            font-weight: 700; /* Bold text */
-            color: #333333; /* Dark text to stand out */
-        }
-
-        .hero-section p {
-            font-size: 1.5rem; /* Slightly larger font for clarity */
-            color: #6e6e73; /* Medium gray for secondary text */
-        }
-
-        .btn-light {
-            background-color: #0071e3; /* Apple-style blue button */
-            color: #ffffff;
+        .panel {
             border: none;
+            background-color: #fff;
+            padding: 20px;
+            margin-top: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
         }
 
-        .btn-light:hover {
-            background-color: #005bb5; /* Darker blue on hover */
-            color: #ffffff;
+        .repository-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: flex-start;
         }
 
-        .card {
-            background-color: #f8f8f8; /* Light gray card background */
-            border: none; /* No border for clean look */
-            transition: transform 0.2s, box-shadow 0.2s; /* Smooth transition effects */
+		.repository-card {
+		    flex: 1 1 160px;
+		    max-width: 180px;
+		    border: 1px solid #ccc;
+		    border-radius: 5px;
+		    padding: 10px;
+		    margin: 10px;
+		    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+		    font-size: 14px;
+		    cursor: pointer;
+		    transition: transform 0.3s ease, opacity 0.3s ease;
+		    position: relative; /* Add this for button positioning */
+		}
+		
+		.repository-card.active {
+		    flex: 1 1 100%; /* Make active card take full width */
+		    max-width: none; /* Remove max-width restriction */
+		    opacity: 1; /* Fully visible */
+		    z-index: 1; /* Bring it to front */
+		    transition: transform 0.5s ease; /* Smooth transition */
+		}
+		
+		.repository-card:hover {
+		    transform: translateY(-2px);
+		    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+		}
+		
+		.btn-close {
+		    position: absolute; /* Position the button absolutely */
+		    top: 10px; /* Distance from the top */
+		    right: 10px; /* Distance from the right */
+		    cursor: pointer;
+		    font-size: 20px;
+		    display: none; /* Hidden by default */
+		}
+		
+		.repository-card.active .btn-close {
+		    display: block; /* Show close button only for active card */
+		}
+
+
+        .add-repo-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            background-color: #f0f0f0;
+            border: 2px dashed #ccc;
+            transition: background-color 0.3s ease;
         }
 
-        .card:hover {
-            transform: scale(1.05); /* Scale effect on hover */
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Light shadow for hover effect */
+        .add-repo-card:hover {
+            background-color: #e0e0e0;
         }
 
-        footer {
-            background-color: #f8f8f8; /* Light gray background for footer */
-            color: #333333; /* Dark gray text for footer */
-            padding: 20px 0;
+        .add-repo-card .plus-sign {
+            font-size: 3rem;
+            color: #777;
+            margin-bottom: 10px;
         }
 
-        footer a {
-            color: #0071e3; /* Blue color for footer links */
-            text-decoration: none;
-        }
-
-        footer a:hover {
-            color: #005bb5; /* Darker blue on hover */
-        }
-
-        .profile-img {
-            width: 40px; /* Set desired width */
-            height: 40px; /* Set desired height */
-            border-radius: 50%; /* Make the image round */
-            margin-left: 10px; /* Space between navbar items */
+        .add-repo-card h5 {
+            font-size: 1.2rem;
+            margin: 0;
+            color: #555;
         }
     </style>
 </head>
 <body>
 
-    <!-- Navigation Bar -->
-    <nav class="navbar navbar-expand-lg">
-        <div class="container">
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container-fluid">
             <a class="navbar-brand" href="#">MyBackup</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
             <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Home</a>
+                    </li>
+                </ul>
                 <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link active" aria-current="page" href="#">Home</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">About</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/adminhome">Admin</a>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <img src="https://via.placeholder.com/40" class="avatar" alt="User Avatar"> 
+                            <span th:text="${username}">Username</span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                            <li><a class="dropdown-item" href="/profile">Profile</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" th:href="@{/logout}">Logout</a></li>
+                        </ul>
                     </li>
                 </ul>
             </div>
         </div>
     </nav>
 
-    <!-- Hero Section -->
-    <header class="hero-section text-center">
-        <div class="container">
-            <h1 class="display-4">Welcome to MyBackup</h1>
-            <p class="lead">Your data is safe with us. Backup and restore made easy.</p>
-            <form action="/start" method="get">
-                <button type="submit" class="btn btn-light btn-lg">Get Started</button>
-            </form>
-        </div>
-    </header>
-
     <!-- Main Content -->
-    <div class="container my-5">
-        <h2 class="text-center mb-4">Features</h2>
-        <div class="row">
-            <div class="col-md-4">
-                <div class="card mb-4">
-                    <img src="/images/secure-backup.webp" class="card-img-top" alt="Feature 1">
-                    <div class="card-body">
-                        <h5 class="card-title">Secure Backup</h5>
-                        <p class="card-text">Keep your data safe with our secure backup solutions.</p>
-                    </div>
-                </div>
+    <div class="container mt-4">
+        <!-- Tasks Panel -->
+        <div class="panel" id="tasks-panel">
+            <div class="panel-title">
+                <h4>Tasks</h4>
             </div>
-            <div class="col-md-4">
-                <div class="card mb-4">
-                    <img src="/images/feature2.png" class="card-img-top" alt="Feature 2">
-                    <div class="card-body">
-                        <h5 class="card-title">Easy Restore</h5>
-                        <p class="card-text">Quickly restore your data with just a few clicks.</p>
-                    </div>
-                </div>
+            <!-- Add your task content here -->
+            <p>Your tasks will be displayed here.</p>
+        </div>
+
+        <!-- Repository List Panel -->
+        <div class="panel" id="repository-list-panel">
+            <div class="panel-title">
+                <h4>Backup Repositories</h4>
             </div>
-            <div class="col-md-4">
-                <div class="card mb-4">
-                    <img src="/images/feature3.png" class="card-img-top" alt="Feature 3">
-                    <div class="card-body">
-                        <h5 class="card-title">Cloud Integration</h5>
-                        <p class="card-text">Seamlessly integrate with your favorite cloud services.</p>
-                    </div>
-                </div>
+            <div class="repository-container" id="repository-container">
+                <!-- Repository cards will be dynamically added here -->
             </div>
         </div>
     </div>
 
-    <!-- Footer -->
-    <footer class="text-center py-4">
-        <div class="container">
-            <p class="m-0">© 2024 MyBackup. All rights reserved.</p>
-            <div>
-                <a href="#" class="me-3"><i class="bi bi-facebook"></i></a>
-                <a href="#" class="me-3"><i class="bi bi-twitter"></i></a>
-                <a href="#"><i class="bi bi-instagram"></i></a>
-            </div>
-        </div>
-    </footer>
+    <!-- Include SockJS -->
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.5.0/dist/sockjs.min.js"></script>
+    <!-- Include Stomp.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+    <!-- Bootstrap JS (optional) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <!-- DataTables JS -->
+    <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
 
-    <script src="/js/bootstrap.bundle.min.js"></script> <!-- Bootstrap Bundle with Popper -->
+    <script th:inline="javascript">
+        document.addEventListener("DOMContentLoaded", function() {
+            fetchRepositories();
+        });
+
+        function fetchRepositories() {
+            const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+            const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
+            var clientID = /*[[${clientID}]]*/ 'defaultClientID';
+
+            const clientIDRequest = {
+                clientID: clientID
+            };
+
+            fetch('/api/repositories/list-by-clientID', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    [csrfHeader]: csrfToken
+                },
+                body: JSON.stringify(clientIDRequest)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                displayRepositories(data);
+            })
+            .catch(error => {
+                console.error('Error fetching repositories:', error);
+            });
+        }
+
+        function displayRepositories(repositories) {
+            const container = document.getElementById("repository-container");
+            container.innerHTML = ''; // Clear previous content
+
+            repositories.forEach(repo => {
+                const repoCard = document.createElement("div");
+                repoCard.classList.add("repository-card");
+
+                // Create the repository card's inner HTML
+                repoCard.innerHTML = `
+                    <div class="card-header">
+                        <h5>${repo.serverName}</h5>
+                        <button type="button" class="btn-close" aria-label="Close" onclick="closeRepoCard(event)"></button>
+                    </div>
+                    <div class="card-body">
+                        <p>URL: ${repo.serverUrl}</p>
+                        <p>Destination: ${repo.destDirectory}</p>
+                    </div>
+                `;
+
+    			console.log("repo:", repo);  // Corrected logging statement
+                
+                // Bind the onclick event to the repoCard
+                repoCard.onclick = () => {
+                    window.location.href = `/repository?id=${repo.repoID}`; // Navigate to the details page with the repoID
+                };
+
+                // Append the card to the container
+                container.appendChild(repoCard);
+            });
+
+
+
+            // Create the "Add Repository" card
+            const addRepoCard = document.createElement("div");
+            addRepoCard.classList.add("repository-card", "add-repo-card");
+            addRepoCard.innerHTML = `
+                <span class="plus-sign">+</span>
+                <h5>Add New Repository</h5>
+            `;
+            addRepoCard.onclick = () => window.location.href = "/repository-create";
+            container.appendChild(addRepoCard);
+        }
+
+        function expandCard(card) {
+            const cards = document.querySelectorAll('.repository-card');
+            cards.forEach(c => {
+                if (c !== card) {
+                    c.style.display = 'none'; // Hide other cards
+                }
+            });
+            card.classList.add('active'); // Make the clicked card active
+            const closeButton = card.querySelector('.btn-close');
+            closeButton.style.display = 'block'; // Show the close button
+        }
+
+        function closeRepoCard(event) {
+            console.log("closeRepoCard clicked");
+
+            // Stop the click event from bubbling up to the repository card click handler
+            event.stopPropagation();
+
+            const activeCard = event.target.closest('.repository-card');
+            
+            if (activeCard) {
+                // Remove the 'active' class to collapse the card
+                activeCard.classList.remove('active');
+
+                // Hide the close button for the collapsed card
+                const closeButton = activeCard.querySelector('.btn-close');
+                closeButton.style.display = 'none'; // Hide the close button
+
+                // Show all cards again (this might not be necessary if they are already displayed)
+                const cards = document.querySelectorAll('.repository-card');
+                cards.forEach(c => {
+                    c.style.display = 'block'; // Ensure all cards are displayed
+                });
+            }
+        }
+    </script>
 </body>
 </html>

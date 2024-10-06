@@ -1,15 +1,19 @@
-package com.myBackup.services.BlockStorage;
+package com.myBackup.services.bfs;
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
+
+import org.springframework.stereotype.Service;
+
 import java.security.NoSuchAlgorithmException;
 
-public class AESEncryptor implements Encryptor {
+@Service
+public class EncryptorAES implements Encryptor {
     private final SecretKey secretKey;
 
     // Constructor to accept a SecretKey
-    public AESEncryptor(SecretKey secretKey) {
+    public EncryptorAES(SecretKey secretKey) {
         this.secretKey = secretKey;
     }
 
@@ -49,13 +53,13 @@ public class AESEncryptor implements Encryptor {
     }
 
     // Static method to create an AESEncryptor with a new SecretKey
-    public static AESEncryptor createWithNewKey() {
-        return new AESEncryptor(generateSecretKey());
+    public static EncryptorAES createWithNewKey() {
+        return new EncryptorAES(generateSecretKey());
     }
 
     // Static method to create an AESEncryptor with an existing SecretKey
-    public static AESEncryptor createWithKey(byte[] keyBytes) {
+    public static EncryptorAES createWithKey(byte[] keyBytes) {
         SecretKeySpec keySpec = new SecretKeySpec(keyBytes, "AES");
-        return new AESEncryptor(keySpec);
+        return new EncryptorAES(keySpec);
     }
 }

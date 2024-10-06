@@ -2,8 +2,8 @@ package com.myBackup.services;
 
 import com.myBackup.models.Job;
 import com.myBackup.models.Task;
-import com.myBackup.server.repository.Repository;
-import com.myBackup.server.repository.RepositoryService;
+import com.myBackup.services.bfs.Repository;
+import com.myBackup.services.bfs.RepositoryStorage;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class TaskBuilder {
 	@Autowired
-	private RepositoryService backupRepositoryService;
+	private RepositoryStorage backupRepositoryService;
     private Job job;
 
     public TaskBuilder withBackupJob(Job job) {

@@ -2,6 +2,7 @@ package com.myBackup.config;
 
 import org.ini4j.Ini;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -16,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Service
+@Lazy
 public class Config {
     private static final Logger logger = LoggerFactory.getLogger(Config.class);
     private static Config instance;
@@ -26,9 +28,14 @@ public class Config {
     private String repositoryFilePath;
 	private String metaDirectory;			// the directory storing the meta data files. critical
 	private String serversFilePath;			// the file records the servers, including localhost:8080
-	private int threadPoolSize;
+	private int    threadPoolSize;
 	private String uuidFilePath;
 	private String jobsFilePath;
+	private String hashCollisionFile;
+	private String keyStoreFilePath;
+	private String keyStorePassword;
+	private String keyPassword;
+	private String keyAlias;
 	
     // Private constructor to prevent instantiation
     private Config() {
@@ -88,9 +95,17 @@ public class Config {
         this.repositoryFilePath = Paths.get(metaDirectory, "repositories.json").toString();
         this.jobsFilePath		= Paths.get(metaDirectory, "jobs.json").toString();
         this.serversFilePath 	= Paths.get(metaDirectory,"servers.json").toString();
+        this.hashCollisionFile	= Paths.get(metaDirectory, "hashcollision.txt").toString();
         this.uuidFilePath 		= Paths.get(getAppDirectory(), "config", "uuid.id").toString();
+        
         this.encryptData = Boolean.parseBoolean(Optional.ofNullable(ini.get("settings", "encrypt_data")).orElse("false"));
         this.threadPoolSize = Integer.parseInt(Optional.ofNullable(ini.get("settings", "threadPoolSize")).orElse("5"));
+
+        
+        this.keyStoreFilePath = Paths.get(getAppDirectory(),"config","keystore.ks").toString();
+        this.keyStorePassword = Optional.ofNullable(ini.get("key",  "keystorefile_pwd")).orElse("myBackup");
+        this.keyPassword      = Optional.ofNullable(ini.get("key", "keystore_pwd")).orElse("myBackup");
+        this.keyAlias         = Optional.ofNullable(ini.get("key",  "alias")).orElse("myBackup");
         
         logger.info("File Paths: metaDirector: {} usersFilePath: {}  backupRepositoryFilePath: {}   serversFilePath: {}    uuidFilePath: {}", 
         		                 metaDirectory, usersFilePath, repositoryFilePath, serversFilePath, uuidFilePath);
@@ -155,28 +170,40 @@ public class Config {
 		return metaDirectory;
 	}
 
-	public void setMetaDirectory(String metaDirectory) {
-		this.metaDirectory = metaDirectory;
-	}
-
 	public String getServersFilePath() {
 		return serversFilePath;
-	}
-
-	public void setServersFilePath(String serversFilePath) {
-		this.serversFilePath = serversFilePath;
 	}
 
 	public String getUuidFilePath() {
 		return uuidFilePath;
 	}
 
-	public void setUuidFilePath(String uuidFilePath) {
-		this.uuidFilePath = uuidFilePath;
-	}
-
 	public String getJobFilePath() {
 		return jobsFilePath;
+	}
+
+	public String getHashCollisionFile() {
+		return hashCollisionFile;
+	}
+
+	public void setHashCollisionFile(String hashCollisionFile) {
+		this.hashCollisionFile = hashCollisionFile;
+	}
+
+	public String getKeyStoreFilePath() {
+		return keyStoreFilePath;
+	}
+
+	public String getKeyStorePassword() {
+		return keyStorePassword;
+	}
+
+	public String getKeyPassword() {
+		return keyPassword;
+	}
+
+	public String getKeyAlias() {
+		return keyAlias;
 	}
 
 	//public void setJobsFilePath(String jobsFilePath) {

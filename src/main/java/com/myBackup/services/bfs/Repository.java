@@ -1,4 +1,4 @@
-package com.myBackup.server.repository;
+package com.myBackup.services.bfs;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -25,7 +25,7 @@ public class Repository {
     private final Set<String> clientIDs;
     private String serverUrl; // New attribute
     private String serverName;
-
+    
     // Constructor
     public Repository() {
         this.repoID = UUID.randomUUID().toString();

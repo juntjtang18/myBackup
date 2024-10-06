@@ -1,6 +1,4 @@
-package com.myBackup.services.BlockStorage;
-
-import com.myBackup.services.BlockStorage.BlockSchema;
+package com.myBackup.services.bfs;
 
 import java.io.IOException;
 import java.io.RandomAccessFile;

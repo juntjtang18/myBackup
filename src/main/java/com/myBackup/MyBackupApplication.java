@@ -17,15 +17,19 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 import com.myBackup.client.Utility;
+import com.myBackup.client.services.UUIDService;
+import com.myBackup.config.Config;
 import com.myBackup.security.UserService;
 
 @SpringBootApplication(exclude = {ErrorMvcAutoConfiguration.class})
 public class MyBackupApplication {
     private final UserService userService;
-
+    private final UUIDService uuidService;
+    
     @Autowired
-    public MyBackupApplication(UserService userService) {
+    public MyBackupApplication(UserService userService, UUIDService uuidService) {
         this.userService = userService;
+        this.uuidService = uuidService;
     }
 
     public static void main(String[] args) {
@@ -52,11 +56,11 @@ public class MyBackupApplication {
     @PostConstruct
     public void init() {
         String username = System.getProperty("user.name"); // Get the current user's name
-        String macAddress = Utility.getMACAddress(); // Get the MAC address
+        String uuid = uuidService.getUUID(); 
 
         try {
             if (userService.isFirstUser()) { // Check if this is the first user
-                userService.registerUser(username, macAddress, username + "@mybackup.com"); // Register the first user
+                userService.registerUser(username, uuid, username + "@mybackup.com"); // Register the first user
             }
         } catch (IOException e) {
             throw new RuntimeException("Failed to check or register user", e);

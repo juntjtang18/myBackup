@@ -1,26 +1,32 @@
 package com.myBackup.security;
 
 import com.myBackup.config.Config;
-import org.springframework.stereotype.Component;
 
-@Component
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
 public class UserRepositoryFactory {
 
     private final Config config;
+    @Value("${user.repository.type:file}")
+    private String repositoryType;
 
     public UserRepositoryFactory(Config config) {
         this.config = config;
     }
 
-    // Factory method to create the appropriate UserRepository implementation
-    public UserRepository createUserRepository(String type) {
-        if ("file".equalsIgnoreCase(type)) {
-            return new UserRepositoryFileImpl(config);  // File-based user repository
+    @Bean
+    public UserRepository userRepository() {
+        if ("file".equalsIgnoreCase(repositoryType)) {
+            return new UserRepositoryFileImpl(config);
         } 
-        // In the future, you can add more types, e.g., database:
-        // else if ("database".equalsIgnoreCase(type)) {
+        // In the future, we can add more types, e.g., database:
+        // else if ("database".equalsIgnoreCase(repositoryType)) {
         //     return new UserRepositoryDatabaseImpl(config);
         // }
-        throw new IllegalArgumentException("Unknown UserRepository type: " + type);
+        throw new IllegalArgumentException("Unknown UserRepository type: " + repositoryType);
     }
+
 }
