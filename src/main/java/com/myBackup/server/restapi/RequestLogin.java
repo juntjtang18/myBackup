@@ -1,6 +1,6 @@
 package com.myBackup.server.restapi;
 
-public class LoginRequest {
+public class RequestLogin {
     private String username;
     private String password;
 	public String getUsername() {

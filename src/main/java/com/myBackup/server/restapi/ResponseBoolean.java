@@ -1,10 +1,10 @@
 package com.myBackup.server.restapi;
 
-public class BooleanResponse {
+public class ResponseBoolean {
     private boolean exists;
 
     // Constructor
-    public BooleanResponse(boolean exists) {
+    public ResponseBoolean(boolean exists) {
         this.exists = exists;
     }
 

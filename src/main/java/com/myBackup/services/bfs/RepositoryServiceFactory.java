@@ -7,15 +7,10 @@ import java.util.Map;
 
 @Service
 public class RepositoryServiceFactory {
+	@Autowired
 	private RepositoryStorage repoStorage;
     private final Map<String, RepositoryService> repositoryServices = new HashMap<>();
     
-    @Autowired
-    public RepositoryServiceFactory (RepositoryStorage repoStorage) {
-    	this.repoStorage = repoStorage;
-    }
-
-    // Method to get or create a RepositoryService instance for a specific repository
     public RepositoryService getRepositoryService(String repositoryId) {
         // Check if the repository already exists in the map
         if (!repositoryServices.containsKey(repositoryId)) {

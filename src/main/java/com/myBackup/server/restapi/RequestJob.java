@@ -5,7 +5,7 @@ import java.util.List;
 
 import com.myBackup.models.Job;
 
-public class JobRequest {
+public class RequestJob {
     private String jobID;
     private List<String> clientIDs;
     private String sourceDirectory;
@@ -16,10 +16,10 @@ public class JobRequest {
     private Job.JobType type; // Use JobType enum from BackupJob
 
     // Default constructor
-    public JobRequest() {}
+    public RequestJob() {}
 
     // Full constructor
-    public JobRequest(String jobID, List<String> clientIDs, String sourceDirectory,
+    public RequestJob(String jobID, List<String> clientIDs, String sourceDirectory,
                       String repositoryID, String creator, Instant creationTime,
                       String cronExpression, Job.JobType type) {
         this.jobID = jobID;

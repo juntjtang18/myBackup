@@ -8,16 +8,18 @@ import java.nio.file.Paths;
 import java.util.Map;
 import java.util.Set;
 
-public class RepositoryStorageBuilder {
-    private final RepositoryStorage service;
+import org.springframework.beans.factory.annotation.Autowired;
+
+public class RepositoryBuilder {
+	@Autowired
+    private RepositoryStorage repoStorage;
     private Repository repository;
      
-    public RepositoryStorageBuilder(RepositoryStorage service) {
-        this.service = service;
-        this.repository = service.buildRepository();
+    public RepositoryBuilder() {
+        this.repository = new Repository();
     }
 
-    public RepositoryStorageBuilder mountTo(String destination) {
+    public RepositoryBuilder mountTo(String destination) {
         if (destination == null || destination.isEmpty()) {
             throw new IllegalArgumentException("Destination directory must not be empty.");
         }
@@ -42,7 +44,7 @@ public class RepositoryStorageBuilder {
         return this;
     }
 
-    public RepositoryStorageBuilder grantTo(String clientID) {
+    public RepositoryBuilder grantTo(String clientID) {
         // Validate clientID
         if (clientID == null || clientID.isEmpty()) {
             throw new IllegalArgumentException("Client ID must not be empty.");
@@ -58,7 +60,7 @@ public class RepositoryStorageBuilder {
     }
 
     // New method: Connect to server and set serverUrl
-    public RepositoryStorageBuilder connectTo(String serverUrl, String serverName) {
+    public RepositoryBuilder connectTo(String serverUrl, String serverName) {
         // Validate serverUrl
         if (serverUrl == null || serverUrl.isEmpty()) {
             throw new IllegalArgumentException("Server URL must not be empty.");
@@ -70,7 +72,7 @@ public class RepositoryStorageBuilder {
         return this;
     }
     
-    public RepositoryStorageBuilder connectTo(String serverUrl) {
+    public RepositoryBuilder connectTo(String serverUrl) {
         // Validate serverUrl
         if (serverUrl == null || serverUrl.isEmpty()) {
             throw new IllegalArgumentException("Server URL must not be empty.");
@@ -86,9 +88,9 @@ public class RepositoryStorageBuilder {
         Path jobsFilePath = Paths.get(repository.getDestDirectory(), "jobs.json");
         if (Files.exists(jobsFilePath)) {
             try {
-                Map<String, Job> loadedJobs = service.getObjectMapper().readValue(
+                Map<String, Job> loadedJobs = repoStorage.getObjectMapper().readValue(
                     jobsFilePath.toFile(),
-                    service.getObjectMapper().getTypeFactory().constructMapType(Map.class, String.class, Job.class)
+                    repoStorage.getObjectMapper().getTypeFactory().constructMapType(Map.class, String.class, Job.class)
                 );
                 repository.getJobs().putAll(loadedJobs);
             } catch (IOException e) {
@@ -101,9 +103,9 @@ public class RepositoryStorageBuilder {
         Path clientIDsFilePath = Paths.get(repository.getDestDirectory(), "clients.json");
         if (Files.exists(clientIDsFilePath)) {
             try {
-                Set<String> loadedClientIDs = service.getObjectMapper().readValue(
+                Set<String> loadedClientIDs = repoStorage.getObjectMapper().readValue(
                     clientIDsFilePath.toFile(),
-                    service.getObjectMapper().getTypeFactory().constructCollectionType(Set.class, String.class)
+                    repoStorage.getObjectMapper().getTypeFactory().constructCollectionType(Set.class, String.class)
                 );
                 repository.getClientIDs().addAll(loadedClientIDs);
             } catch (IOException e) {
@@ -115,7 +117,7 @@ public class RepositoryStorageBuilder {
     private void persistClientIDs() {
         Path clientIDsFilePath = Paths.get(repository.getDestDirectory(), "clients.json");
         try {
-        	service.getObjectMapper().writeValue(clientIDsFilePath.toFile(), repository.getClientIDs());
+        	repoStorage.getObjectMapper().writeValue(clientIDsFilePath.toFile(), repository.getClientIDs());
         } catch (IOException e) {
             e.printStackTrace();
             throw new RuntimeException("Failed to persist client IDs to " + clientIDsFilePath, e);
@@ -123,6 +125,7 @@ public class RepositoryStorageBuilder {
     }
 
     public Repository build() {
+    	repoStorage.createRepository(repository);
         return repository; // Return the fully constructed repository
     }
 }

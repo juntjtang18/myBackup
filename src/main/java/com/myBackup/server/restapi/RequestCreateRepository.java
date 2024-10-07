@@ -1,6 +1,6 @@
-	package com.myBackup.server.restapi;
+package com.myBackup.server.restapi;
 
-public class CreateRepositoryRequest {
+public class RequestCreateRepository {
 	private String serverUrl;
 	private String serverName;
     private String destDirectory;

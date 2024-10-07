@@ -1,9 +1,9 @@
 package com.myBackup.server.restapi;
 
-public class StringRequest {
+public class RequestString {
 	private String message;
 	
-	public StringRequest () {
+	public RequestString () {
 		
 	}
 	

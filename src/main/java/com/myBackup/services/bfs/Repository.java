@@ -19,10 +19,10 @@ class DirectoryNotFoundException extends RuntimeException {
 }
 
 public class Repository {
-    private final String repoID;
+    private String repoID;
     private String destDirectory; // Renamed variable
-    private final Map<String, Job> jobs; // Map of jobs
-    private final Set<String> clientIDs;
+    private Map<String, Job> jobs; // Map of jobs
+    private Set<String> clientIDs;
     private String serverUrl; // New attribute
     private String serverName;
     
@@ -36,7 +36,13 @@ public class Repository {
         this.serverName = "";
     }
     
-    // Get the destination directory of the repository
+    public Repository(String repoID, String clientID) {
+    	super();
+    	this.clientIDs.add(clientID);
+    	this.repoID = repoID;
+	}
+
+	// Get the destination directory of the repository
     public String getDestDirectory() {
         return destDirectory;
     }
@@ -93,5 +99,9 @@ public class Repository {
 	    return jobs.values().stream()
 	            .filter(job -> job.getCreator().equals(creator)) // Assuming BackupJob has getCreator() method
 	            .collect(Collectors.toMap(Job::getJobID, job -> job)); // Collecting into a map
+	}
+
+	public void setRepoID(String repoID) {
+		this.repoID = repoID;
 	}
 }

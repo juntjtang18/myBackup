@@ -35,7 +35,7 @@ public class JobRestController {
     }
 
     @PostMapping("/")
-    public ResponseEntity<Job> createJob(@RequestBody JobRequest jobRequest) {
+    public ResponseEntity<Job> createJob(@RequestBody RequestJob jobRequest) {
         logger.info("Received JobRequest: {}", jobRequest);
 
         if (jobRequest.getCreator() == null || jobRequest.getCreator().trim().isEmpty()) {

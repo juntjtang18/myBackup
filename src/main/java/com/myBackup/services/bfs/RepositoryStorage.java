@@ -18,6 +18,14 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.myBackup.config.Config;
 
+
+/*
+ * This class is managing the repository records in the repository.json file. 
+ * It only read the repository from the repository.json, won't load the jobs and clientIDs to repository class. 
+ * The RepositoryBuilder will load the jobs and clientIDs and construct a full Repository class. 
+ * They could be merged into one class to remove the confusion.
+ * 
+ */
 @Service
 public class RepositoryStorage {
 
@@ -137,7 +145,7 @@ public class RepositoryStorage {
     }
 
     // Method to create and add a new BackupRepository to the cache
-    public void createRepository(Repository repository) {
+    public Repository createRepository(Repository repository) {
         lock.lock();
         try {
             // Check if the repository already exists
@@ -154,6 +162,7 @@ public class RepositoryStorage {
         } finally {
             lock.unlock();
         }
+		return repository;
     }
 
     // Method to return the count of repositories
@@ -166,6 +175,28 @@ public class RepositoryStorage {
         }
     }
 
+    public void delete(String repoID) {
+        lock.lock();
+        try {
+            // Check if the repository exists in the cache
+            if (!repositoryCache.containsKey(repoID)) {
+                throw new IllegalArgumentException("Repository with ID " + repoID + " does not exist.");
+            }
+
+            // Remove the repository from the cache
+            repositoryCache.remove(repoID);
+            logger.info("Deleted repository with ID: {}", repoID);
+
+            // Persist the updated cache to the JSON file
+            saveRepositories();
+        } catch (IllegalArgumentException e) {
+            logger.error(e.getMessage());
+            throw e; // Re-throwing the exception for higher-level handling if needed
+        } finally {
+            lock.unlock();
+        }
+    }
+    
     @PreDestroy
     public void cleanup() {
         logger.info("Cleaning up BackupRepositoriesService, saving repositories...");

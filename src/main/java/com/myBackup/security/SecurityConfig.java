@@ -1,5 +1,6 @@
 package com.myBackup.security;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
@@ -9,11 +10,14 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
+import org.springframework.security.web.csrf.CsrfTokenRepository;
+import org.springframework.security.web.csrf.HttpSessionCsrfTokenRepository;
 
 
 @SuppressWarnings("deprecation")
@@ -21,33 +25,46 @@ import org.springframework.security.web.authentication.AuthenticationFailureHand
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
+	@Autowired
 	private UserDetailsService userDetailsService;
 	
-	public SecurityConfig(UserDetailsService userDetailsService) {
-		this.userDetailsService = userDetailsService;
-	}
 	
+    @Bean
+    public CsrfTokenRepository csrfTokenRepository() {
+        return new HttpSessionCsrfTokenRepository(); // Using default header name
+    }
+    
     @SuppressWarnings("removal")
 	@Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            .authorizeRequests(authorizeRequests ->
+        .sessionManagement()
+        .sessionCreationPolicy(SessionCreationPolicy.ALWAYS)
+        .and()
+        .authorizeRequests(authorizeRequests ->
                 authorizeRequests
                 .requestMatchers("/", "/login", "/login-auto", "/logout", "/css/**", "/js/**", "/fonts/**", "/icons/**", "/images/**")
                 .permitAll()
                 .requestMatchers("/swagger-ui/**")
                 .permitAll()
-                .anyRequest()
-                //.permitAll()
-                .authenticated() // All other requests require authentication
+                .requestMatchers("/home").authenticated() // Ensure /home is authenticated
+                .anyRequest().authenticated() // All other requests require authentication
             )
-            .formLogin(form -> form
-                    .loginPage("/login")
-                    .failureHandler(customAuthenticationFailureHandler()) // Ensure custom handler is used
-                    .defaultSuccessUrl("/home", true)
-                    .failureUrl("/login?error=true")
-                    .permitAll()
-            )
+	        .csrf()
+	        //.csrfTokenRepository(csrfTokenRepository())  // Ensure this is your custom repository
+	        .and()
+        	.formLogin().disable()
+        	//.formLogin(form -> form
+            //        .loginPage("/login")
+            //        .successHandler((request, response, authentication) -> {
+                        // Custom success logic here
+            //            response.sendRedirect("/home");
+            //        })
+            //        .failureHandler(customAuthenticationFailureHandler()) // Ensure custom handler is used
+            //        //.defaultSuccessUrl("/home", true)
+            //        .failureUrl("/login?error=true")
+            //        .permitAll()
+            //)
             .logout()
 	            .logoutUrl("/logout")
 	            .logoutSuccessUrl("/login?logout=true")

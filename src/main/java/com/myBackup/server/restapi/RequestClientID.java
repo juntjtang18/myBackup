@@ -1,9 +1,6 @@
 package com.myBackup.server.restapi;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
-public class ClientIDRequest {
+public class RequestClientID {
     private String clientID;
 
     // Constructor with @JsonCreator to support JSON deserialization
@@ -12,7 +9,11 @@ public class ClientIDRequest {
     //    this.clientID = clientID;
     //}
 
-    // Getter and setter
+    public RequestClientID(String clientID2) {
+		this.clientID = clientID2;
+	}
+
+	// Getter and setter
     public String getClientID() {
         return clientID;
     }

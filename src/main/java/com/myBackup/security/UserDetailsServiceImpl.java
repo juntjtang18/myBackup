@@ -59,6 +59,8 @@ public class UserDetailsServiceImpl implements UserDetailsService {
                     	.map(role -> new SimpleGrantedAuthority(role.trim()))
                         .collect(Collectors.toList());
                     
+                    logger.debug("authorities: {}", authorities);
+                    
                     return Optional.of(new User(storedUsername, storedPassword, authorities));
                 }
             }

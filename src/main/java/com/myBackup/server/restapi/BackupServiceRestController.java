@@ -2,7 +2,6 @@ package com.myBackup.server.restapi;
 
 import org.springframework.web.bind.annotation.*;
 
-import com.myBackup.services.bfs.Backup;
 import com.myBackup.services.bfs.RepositoryService;
 import com.myBackup.services.bfs.RepositoryServiceFactory;
 
@@ -13,21 +12,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 
 @RestController
 @RequestMapping("/api/backup")
 public class BackupServiceRestController {
-    private final RepositoryServiceFactory repositoryServiceFactory;
-    private RepositoryService repoService;
+	@Autowired
+    private RepositoryServiceFactory repositoryServiceFactory;
+    //private RepositoryService repoService;
     
-    // Constructor injection for RepositoryServiceFactory
-    @Autowired
-    public BackupServiceRestController(RepositoryServiceFactory repositoryServiceFactory) {
-        this.repositoryServiceFactory = repositoryServiceFactory;
-        
-    }
-
     @GetMapping("/test")
     @ResponseBody
     public ResponseEntity<String> testEndpoint() {
@@ -80,7 +72,7 @@ public class BackupServiceRestController {
 
     @GetMapping("/does-block-hash-exist")
     @ResponseBody
-    public ResponseEntity<BooleanResponse> blockHashExists(@RequestParam("repositoryId") String repositoryId, @RequestParam("hash") String hash) {
+    public ResponseEntity<ResponseBoolean> blockHashExists(@RequestParam("repositoryId") String repositoryId, @RequestParam("hash") String hash) {
         
         // Print the input parameters for debugging
         System.out.println("Received repositoryId: " + repositoryId);
@@ -90,7 +82,7 @@ public class BackupServiceRestController {
         
         try {
             boolean exists = repositoryService.blockHashExists(hash);
-            BooleanResponse response = new BooleanResponse(exists);
+            ResponseBoolean response = new ResponseBoolean(exists);
             return ResponseEntity.ok()
                                  .contentType(MediaType.APPLICATION_JSON)
                                  .body(response); // Return JSON response
@@ -98,7 +90,7 @@ public class BackupServiceRestController {
             e.printStackTrace(); // Log the exception
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                                  .contentType(MediaType.APPLICATION_JSON)
-                                 .body(new BooleanResponse(false)); // Return a JSON error response
+                                 .body(new ResponseBoolean(false)); // Return a JSON error response
         }
     }
 

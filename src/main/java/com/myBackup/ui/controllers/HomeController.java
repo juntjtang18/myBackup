@@ -2,15 +2,17 @@ package com.myBackup.ui.controllers;
 
 import com.myBackup.client.services.UUIDService;
 import com.myBackup.models.UserDto;
+
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -19,6 +21,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
+import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -59,23 +62,36 @@ public class HomeController {
     @PostMapping("/login")
     public void login(@RequestParam String username, 
                       @RequestParam String password, 
+                      HttpServletRequest request,  // Add HttpServletRequest parameter
                       HttpServletResponse response) throws IOException {
+    	logger.info("Entering Post /login...");
+    	
         try {
-            // Create an authentication token with the provided credentials
-            UsernamePasswordAuthenticationToken authenticationToken =
-                    new UsernamePasswordAuthenticationToken(username, password);
-
-            // Authenticate the user
+            UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(username, password);
             Authentication authentication = authenticationManager.authenticate(authenticationToken);
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+            logger.info("Authenticated user: {}", authentication.getName());
+            logger.info("Authorities: {}", authentication.getAuthorities());
+            HttpSession session = request.getSession(true);  // create if not exists
+            logger.info("Session ID: {}", session.getId());
+            request.changeSessionId();  // This regenerates the session ID.
+            HttpSession newSession = request.getSession();  // Gets the new session.
+            newSession.setAttribute("SPRING_SECURITY_CONTEXT", SecurityContextHolder.getContext());
             
-            // If authentication is successful, redirect to /home
+            response.addCookie(new Cookie("JSESSIONID", session.getId()));
+            /*
+            CsrfToken csrfToken = (CsrfToken) request.getAttribute(CsrfToken.class.getName());
+            if (csrfToken != null) {
+                response.setHeader("X-CSRF-TOKEN", csrfToken.getToken());
+            }
+            logger.info("csrfToken: {}", csrfToken.getToken());
+            */
             response.sendRedirect("/home");
-
         } catch (AuthenticationException e) {
-            // If authentication fails, return 401 Unauthorized status
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Login failed: " + e.getMessage());
         }
     }
+
 
 
     
