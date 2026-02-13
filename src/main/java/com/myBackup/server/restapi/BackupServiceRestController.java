@@ -32,9 +32,9 @@ public class BackupServiceRestController {
             @RequestParam("repositoryId") String repositoryId,
             @RequestParam("hash") String hash) {
         
-        RepositoryService repositoryService = repositoryServiceFactory.getRepositoryService(repositoryId);
-        
         try {
+        	RepositoryService repositoryService = repositoryServiceFactory.getRepositoryService(repositoryId);
+        
             boolean exists = hash != null && repositoryService.fileHashExists(hash);
             return ResponseEntity.ok()
                                  .contentType(MediaType.APPLICATION_JSON) // Set content type to JSON
@@ -56,10 +56,10 @@ public class BackupServiceRestController {
             @RequestParam("encrypt") boolean encrypt,  
             @RequestBody byte[] dataBlock) {
         
-        // Get the RepositoryService for the given repositoryId
-        RepositoryService repositoryService = repositoryServiceFactory.getRepositoryService(repositoryId);
-        
         try {
+        	// Get the RepositoryService for the given repositoryId
+        	RepositoryService repositoryService = repositoryServiceFactory.getRepositoryService(repositoryId);
+        
             String resultHash = repositoryService.uploadBlock(hash, dataBlock, encrypt);
             return ResponseEntity.ok(resultHash);  // Return 200 OK with the resulting hash
         } catch (NoSuchAlgorithmException | IOException e) {
@@ -78,9 +78,9 @@ public class BackupServiceRestController {
         System.out.println("Received repositoryId: " + repositoryId);
         System.out.println("Received hash: " + hash);
 
-        RepositoryService repositoryService = repositoryServiceFactory.getRepositoryService(repositoryId);
-        
         try {
+        	RepositoryService repositoryService = repositoryServiceFactory.getRepositoryService(repositoryId);
+        
             boolean exists = repositoryService.blockHashExists(hash);
             ResponseBoolean response = new ResponseBoolean(exists);
             return ResponseEntity.ok()

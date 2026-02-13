@@ -4,7 +4,9 @@ import jakarta.annotation.PreDestroy;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -27,16 +29,16 @@ import com.myBackup.config.Config;
  * 
  */
 @Service
-public class RepositoryStorage {
+public class RepositoryManager {
 
-    private static final Logger logger = LoggerFactory.getLogger(RepositoryStorage.class);
+    private static final Logger logger = LoggerFactory.getLogger(RepositoryManager.class);
     private final String REPOSITORY_FILE_PATH;
     private final Map<String, Repository> repositoryCache = new ConcurrentHashMap<>();
     private final ReentrantLock lock = new ReentrantLock();
     private final ObjectMapper objectMapper; // Injected ObjectMapper
     private Config config;
     
-    public RepositoryStorage(ObjectMapper objectMapper, Config config) {
+    public RepositoryManager(ObjectMapper objectMapper, Config config) {
         this.objectMapper = objectMapper;
         this.config = config;
         this.REPOSITORY_FILE_PATH = this.config.getBackupRepositoryFilePath();
@@ -144,7 +146,6 @@ public class RepositoryStorage {
         return new Repository();
     }
 
-    // Method to create and add a new BackupRepository to the cache
     public Repository createRepository(Repository repository) {
         lock.lock();
         try {
@@ -153,17 +154,37 @@ public class RepositoryStorage {
                 throw new IllegalArgumentException("Repository with ID " + repository.getRepoID() + " already exists.");
             }
 
-            // Add the repository to the cache
+            // Verify the destination directory
+            String destination = repository.getDestDirectory();
+            if (destination == null || destination.isEmpty()) {
+                throw new IllegalArgumentException("Destination directory must not be empty.");
+            }
+
+            Path dirPath = Paths.get(destination);
+            if (!Files.exists(dirPath)) {
+                try {
+                    Files.createDirectories(dirPath); // Create the directory if it doesn't exist
+                    System.out.println("Destination directory created: " + destination);
+                } catch (IOException e) {
+                    throw new RuntimeException("Failed to create destination directory: " + destination, e);
+                }
+            } else {
+                logger.debug("Using existing destination directory: {}", destination);
+            }
+
+            // Now that the directory has been verified/created successfully, add the repository to the cache
             repositoryCache.put(repository.getRepoID(), repository);
             logger.info("Added repository with ID: {}", repository.getRepoID());
 
             // Persist the updated cache to the JSON file
             saveRepositories();
+            
         } finally {
             lock.unlock();
         }
-		return repository;
+        return repository;
     }
+
 
     // Method to return the count of repositories
     public int repositoryCount() {
@@ -174,7 +195,10 @@ public class RepositoryStorage {
             lock.unlock();
         }
     }
-
+    
+    /*
+     * delete the record in repository.json, should it delete the directory?
+     */
     public void delete(String repoID) {
         lock.lock();
         try {
@@ -186,6 +210,35 @@ public class RepositoryStorage {
             // Remove the repository from the cache
             repositoryCache.remove(repoID);
             logger.info("Deleted repository with ID: {}", repoID);
+
+            // Persist the updated cache to the JSON file
+            saveRepositories();
+        } catch (IllegalArgumentException e) {
+            logger.error(e.getMessage());
+            throw e; // Re-throwing the exception for higher-level handling if needed
+        } finally {
+            lock.unlock();
+        }
+    }
+    
+    public void addClientIDToRepository(String repoID, String clientID) {
+        lock.lock();
+        try {
+            // Retrieve the repository by its ID
+            Repository repository = repositoryCache.get(repoID);
+            if (repository == null) {
+                throw new IllegalArgumentException("Repository with ID " + repoID + " does not exist.");
+            }
+
+            // Check if the clientID already exists in the repository
+            if (repository.getClientIDs().contains(clientID)) {
+                logger.warn("Client ID {} already exists in repository ID {}", clientID, repoID);
+                return; // Exit if the clientID already exists
+            }
+
+            // Add the clientID to the repository
+            repository.getClientIDs().add(clientID);
+            logger.info("Added client ID {} to repository ID {}", clientID, repoID);
 
             // Persist the updated cache to the JSON file
             saveRepositories();

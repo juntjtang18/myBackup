@@ -13,13 +13,13 @@ import com.myBackup.MyBackupApplication;
 import com.myBackup.config.Config;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = MyBackupApplication.class)
-public class RepositoryStorageTest {
+public class RepositoryManagerTest {
 	@Autowired
     private ObjectMapper objectMapper; // Injected ObjectMapper
 	@Autowired
     private Config config;
 	@Autowired
-	private RepositoryStorage repoStorage;
+	private RepositoryManager repoStorage;
 	
 	@Test
 	public void testCreatRepository() {

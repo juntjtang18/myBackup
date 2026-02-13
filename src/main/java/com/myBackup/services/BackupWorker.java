@@ -9,7 +9,7 @@ import com.myBackup.models.Task;
 import com.myBackup.models.Task.TaskStatus;
 import com.myBackup.services.TaskDispatcher.ShutdownEvent;
 import com.myBackup.services.bfs.Backup;
-import com.myBackup.services.bfs.RepositoryStorage;
+import com.myBackup.services.bfs.RepositoryManager;
 
 import java.io.File;
 
@@ -17,11 +17,11 @@ public class BackupWorker implements Runnable {
     private static final Logger logger = LogManager.getLogger(BackupWorker.class);
     private Task task;
     private ApplicationEventPublisher eventPublisher;
-    private RepositoryStorage repoService;
+    private RepositoryManager repoService;
     private volatile boolean running = true; // Control flag
     
     // Constructor
-    public BackupWorker(Task task, ApplicationEventPublisher eventPublisher, RepositoryStorage repoService) {
+    public BackupWorker(Task task, ApplicationEventPublisher eventPublisher, RepositoryManager repoService) {
         this.task = task;
         this.eventPublisher = eventPublisher;
         this.repoService = repoService;

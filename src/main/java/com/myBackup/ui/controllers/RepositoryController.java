@@ -21,7 +21,7 @@ import com.myBackup.server.meta.ServersService;
 import com.myBackup.server.meta.ServersService.Server;
 import com.myBackup.services.JobService;
 import com.myBackup.services.bfs.Repository;
-import com.myBackup.services.bfs.RepositoryStorage;
+import com.myBackup.services.bfs.RepositoryManager;
 
 @Controller
 public class RepositoryController {
@@ -30,7 +30,7 @@ public class RepositoryController {
     @Autowired
     private UUIDService uuidService;
     @Autowired
-    private RepositoryStorage backupRepositoryService;
+    private RepositoryManager backupRepositoryService;
     @Autowired
     private ServersService serversService;
     @Autowired

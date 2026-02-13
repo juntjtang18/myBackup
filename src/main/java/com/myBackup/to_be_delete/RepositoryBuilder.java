@@ -1,6 +1,9 @@
-package com.myBackup.services.bfs;
+package com.myBackup.to_be_delete;
 
 import com.myBackup.models.Job;
+import com.myBackup.services.bfs.Repository;
+import com.myBackup.services.bfs.RepositoryManager;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -12,7 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 public class RepositoryBuilder {
 	@Autowired
-    private RepositoryStorage repoStorage;
+    private RepositoryManager repoStorage;
     private Repository repository;
      
     public RepositoryBuilder() {

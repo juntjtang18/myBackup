@@ -1,9 +1,15 @@
 package com.myBackup.services.bfs;
 
+import java.io.Serializable;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
-public class BackupNode {
+public class BackupNode implements Serializable {
+    private static final long serialVersionUID = 1L; // Unique identifier for serialization
     public enum NodeType {
         FILE,
         DIRECTORY
@@ -13,7 +19,8 @@ public class BackupNode {
     private List<BackupNode> children; // List of child nodes
     private BackupNode parent; // Reference to the parent node
     private NodeType nodeType; // Type of the node: FILE or DIRECTORY
-
+    private String hash;
+    
     public BackupNode(BackupFile backupFile, NodeType nodeType) {
         this.backupFile = backupFile;
         this.children = new ArrayList<>();
@@ -50,5 +57,45 @@ public class BackupNode {
         this.children.remove(child);
     }
 
-    // Additional methods for tree manipulation can be added here
+	public String getHash() {
+		return hash;
+	}
+
+	public void setHash(String hash) {
+		this.hash = hash;
+	}
+	
+	public String getBackupFileName() {
+	    return backupFile.getFileMeta().getFileName(); // Assuming BackupFile has a getName method
+	}
+	
+    public String calculateHash() throws NoSuchAlgorithmException {
+        MessageDigest digest = MessageDigest.getInstance("SHA-256"); // or any preferred algorithm
+        StringBuilder hashBuilder = new StringBuilder();
+
+        if (this.nodeType == NodeType.FILE) {
+            // For file nodes, concatenate block hashes from backupFile
+            for (String blockHash : backupFile.getBlockMap()) {
+                hashBuilder.append(blockHash);
+            }
+        } else { // Directory node
+            // Sort children based on a specific attribute (e.g., name)
+            Collections.sort(children, Comparator.comparing(node -> node.getBackupFileName()));
+
+            // For directory nodes, concatenate children's hashes
+            for (BackupNode child : children) {
+                hashBuilder.append(child.calculateHash());
+            }
+        }
+
+        // Calculate final hash
+        byte[] hashBytes = digest.digest(hashBuilder.toString().getBytes());
+        StringBuilder hexString = new StringBuilder();
+        for (byte b : hashBytes) {
+            String hex = Integer.toHexString(0xff & b);
+            if (hex.length() == 1) hexString.append('0');
+            hexString.append(hex);
+        }
+        return hexString.toString(); // Return the hex representation of the hash
+    }
 }

@@ -9,29 +9,30 @@ import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class FileRefManager {
-    private final Path repositoryRoot;
+    private final Path refRoot;
     @Autowired
     private final ObjectMapper objectMapper;
 
     public FileRefManager(String repositoryRoot) {
-        this.repositoryRoot = Paths.get(repositoryRoot);
+        this.refRoot = Paths.get(repositoryRoot, "refs");
         this.objectMapper = new ObjectMapper(); // Initialize the ObjectMapper
     }
 
  // Method to save hash and BackupFile to a reference file
-    public void saveHashMapping(String hash, BackupFile backupFile) throws IOException {
+    public String saveHashMapping(String hash, BackupFile backupFile) throws IOException {
         Path refFile = getFilePathFromHash(hash);  // Get the full path from hash
         Files.createDirectories(refFile.getParent());  // Create directory if it doesn't exist
 
         // Write the BackupFile to the reference file as JSON
         objectMapper.writeValue(refFile.toFile(), backupFile);
+        return hash;
     }
     
     private Path getFilePathFromHash(String hash) {
         int folderSegmentLength = 2;  // Length of each directory segment
         int numFolders = 4;           // Number of folder levels
 
-        Path refDirectory = repositoryRoot;
+        Path refDirectory = refRoot;
         for (int i = 0; i < numFolders; i++) {
             refDirectory = refDirectory.resolve(hash.substring(i * folderSegmentLength, (i + 1) * folderSegmentLength));
         }
@@ -42,7 +43,7 @@ public class FileRefManager {
     }
 
     // Method to check if a hash exists and retrieve the BackupFile
-    public Optional<BackupFile> checkHashMapping(String hash) throws IOException {
+    public Optional<BackupFile> readHashMapping(String hash) throws IOException {
         Path refFile = getFilePathFromHash(hash);
 
         if (Files.exists(refFile)) {
@@ -76,7 +77,7 @@ public class FileRefManager {
             System.out.println("Hash mapping saved successfully.");
 
             // Check hash mapping
-            Optional<BackupFile> result = manager.checkHashMapping(hash);
+            Optional<BackupFile> result = manager.readHashMapping(hash);
             if (result.isPresent()) {
                 BackupFile retrievedBackupFile = result.get();
                 System.out.println("Backup File Metadata: " + retrievedBackupFile.getFileMeta());

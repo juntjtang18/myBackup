@@ -8,8 +8,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.myBackup.services.bfs.Repository;
-import com.myBackup.services.bfs.RepositoryBuilder;
-import com.myBackup.services.bfs.RepositoryStorage;
+import com.myBackup.services.bfs.RepositoryManager;
+import com.myBackup.to_be_delete.RepositoryBuilder;
 
 import java.io.File; // Import File for directory checking
 import java.util.List;
@@ -20,7 +20,7 @@ public class RepositoryServiceRestController {
     private static final Logger logger = LoggerFactory.getLogger(RepositoryServiceRestController.class);
     
     @Autowired
-    private RepositoryStorage backupReposService;
+    private RepositoryManager backupReposService;
     
     @GetMapping("/list")
     public String getRepositories(@RequestParam("clientID") String clientID) {

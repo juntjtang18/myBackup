@@ -6,7 +6,6 @@ import java.security.NoSuchAlgorithmException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
 
 public class BlockStorage {
     private static final Logger logger = LoggerFactory.getLogger(BlockStorage.class);
@@ -14,24 +13,20 @@ public class BlockStorage {
     private String BLOCKS_DIR;
     private Encryptor encryptor;
 
-    public BlockStorage(String repoDir) {
+    public BlockStorage(String repoDir) throws IOException {
         this.BLOCKS_DIR = Paths.get(repoDir, "blocks").toString();
         initializeDirectoryStructure();
     }
 
-    private void initializeDirectoryStructure() {
+    private void initializeDirectoryStructure() throws IOException {
         // Create the base blocks directory first
         Path blocksPath = Paths.get(BLOCKS_DIR);
-        try {
-            // Check if the directory exists before creating it
-            if (!Files.exists(blocksPath)) {
-                Files.createDirectories(blocksPath);                
-                logger.debug("Blocks directory created successfully at ", blocksPath);
-            } else {
-                logger.debug("Blocks directory already exists.", blocksPath);
-            }
-        } catch (IOException e) {
-            logger.error("Error creating blocks directory(", blocksPath, ": ", e.getMessage());
+        // Check if the directory exists before creating it
+        if (!Files.exists(blocksPath)) {
+            Files.createDirectories(blocksPath);                
+            logger.debug("Blocks directory created successfully at ", blocksPath);
+        } else {
+            logger.debug("Blocks directory already exists.", blocksPath);
         }
     }
 
@@ -116,11 +111,11 @@ public class BlockStorage {
         return Paths.get(BLOCKS_DIR, hash.substring(0, 2), hash.substring(2, 4), hash.substring(4, 6), hash.substring(6,8) + ".bfs").toString();
     }
 
-    public boolean doesBlockExist(String hash) {
-        String filePath = getBlockFilePath(hash); // Get the block file path
-        File file = new File(filePath); // Create a File object
-        return file.exists(); // Return true if the file exists, false otherwise
+    public boolean blockExists(String hash) throws IOException {
+        String[] indexEntry = findIndexEntry(hash); // Check the index for the hash
+        return indexEntry != null; // Return true if the index entry exists, false otherwise
     }
+
 
     public static void main(String[] args) throws Exception {
         BlockStorage bfs = new BlockStorage(System.getProperty("user.dir"));
@@ -133,7 +128,7 @@ public class BlockStorage {
             System.out.println("Retrieved Block Data: " + new String(retrievedData));
 
             // Check if the block exists
-            boolean exists = bfs.doesBlockExist(hash);
+            boolean exists = bfs.blockExists(hash);
             System.out.println("Does Block Exist: " + exists);
         } catch (IOException e) {
             System.err.println("Error storing or reading block: " + e.getMessage());

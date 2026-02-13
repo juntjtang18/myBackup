@@ -77,7 +77,6 @@ public class Config {
     public void loadConfigurations(String iniFilePath) throws IOException {
         Ini ini;
 
-        // Load the file from the filesystem
         File iniFile = new File(iniFilePath);
         if (!iniFile.exists()) {
             throw new IOException("Configuration file not found: " + iniFilePath);

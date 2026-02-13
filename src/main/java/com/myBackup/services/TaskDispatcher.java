@@ -18,7 +18,7 @@ import org.springframework.stereotype.Service;
 import com.myBackup.config.Config;
 import com.myBackup.models.Task;
 import com.myBackup.models.Task.TaskStatus;
-import com.myBackup.services.bfs.RepositoryStorage;
+import com.myBackup.services.bfs.RepositoryManager;
 
 @Service
 public class TaskDispatcher {
@@ -27,9 +27,9 @@ public class TaskDispatcher {
     private final TaskQueue taskQueue;
     ExecutorService executorService;
     private ApplicationEventPublisher eventPublisher;
-    private RepositoryStorage repoService;
+    private RepositoryManager repoService;
 
-    public TaskDispatcher(TaskQueue taskQueue, ApplicationEventPublisher eventPublisher, RepositoryStorage repoService) {
+    public TaskDispatcher(TaskQueue taskQueue, ApplicationEventPublisher eventPublisher, RepositoryManager repoService) {
         this.taskQueue = taskQueue;
         this.eventPublisher = eventPublisher;
         this.repoService = repoService;
